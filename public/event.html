@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event — AOC | Art of Conversation</title>
+<meta name="description" content="Event details — Art of Conversation, MITS Gwalior.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/extra.css">
+<style>
+:root{
+  --bg:#030303; --surface:#0D0D0F; --ivory:#FAF8F4; --champagne:#E7D9B0;
+  --text-dim:#A3A3A8; --border:rgba(255,255,255,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--ivory);font-family:'Inter',sans-serif;font-weight:300;line-height:1.6;overflow-x:hidden;}
+a{color:inherit;}
+.container{max-width:1100px;margin:0 auto;padding:0 32px;}
+.noise{position:fixed;inset:0;pointer-events:none;z-index:5;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+.scroll-progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--champagne);z-index:1100;}
+nav.top{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;justify-content:space-between;align-items:center;
+  padding:22px 40px;background:linear-gradient(rgba(3,3,3,.85),transparent);}
+.logo{font-family:'Fraunces',serif;font-size:20px;letter-spacing:.04em;text-decoration:none;}
+.back-link{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text-dim);text-decoration:none;border:1px solid var(--border);padding:9px 18px;border-radius:100px;transition:border-color .3s ease,color .3s ease;}
+.back-link:hover{border-color:var(--champagne);color:var(--champagne);}
+
+.hero-poster{position:relative;height:78vh;min-height:520px;overflow:hidden;}
+.hero-poster img{width:100%;height:100%;object-fit:cover;filter:brightness(.55);}
+.hero-poster::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,3,3,.3) 0%,rgba(3,3,3,.5) 60%,var(--bg) 100%);}
+.hero-poster-content{position:absolute;bottom:0;left:0;right:0;padding:60px 40px;max-width:1100px;margin:0 auto;}
+.event-tag{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--champagne);margin-bottom:16px;}
+.event-hero-title{font-family:'Fraunces',serif;font-size:clamp(38px,6vw,68px);font-weight:400;line-height:1.05;margin-bottom:20px;}
+.event-meta-row{display:flex;flex-wrap:wrap;gap:26px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-dim);letter-spacing:.04em;}
+
+.event-body{padding:80px 0 160px;}
+.event-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:70px;}
+.event-desc{font-size:16px;color:#E5E3DC;font-weight:300;line-height:1.85;white-space:pre-line;}
+.event-section-title{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--champagne);margin:44px 0 16px;}
+.event-agenda{font-size:15px;color:var(--text-dim);white-space:pre-line;line-height:1.9;}
+
+.side-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px;position:sticky;top:100px;}
+.side-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);font-size:13.5px;}
+.side-row:last-of-type{border-bottom:none;}
+.side-label{color:var(--text-dim);font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;}
+.side-value{text-align:right;}
+.btn-primary{display:inline-block;width:100%;text-align:center;background:var(--champagne);color:#030303;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+  padding:16px 22px;border-radius:100px;margin-top:24px;border:none;cursor:pointer;transition:transform .3s ease;}
+.btn-primary:hover{transform:translateY(-2px);}
+.share-row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+.share-btn{flex:1;min-width:100px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid var(--border);padding:10px;border-radius:100px;cursor:pointer;background:transparent;color:var(--ivory);text-decoration:none;display:inline-block;}
+.share-btn:hover{border-color:var(--champagne);color:var(--champagne);}
+
+/* Countdown */
+.countdown-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:22px;text-align:center;}
+.countdown-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px;}
+.countdown-row{display:flex;justify-content:center;gap:22px;}
+.cd-unit{min-width:48px;}
+.cd-num{font-family:'Fraunces',serif;font-size:30px;color:var(--champagne);line-height:1;}
+.cd-unit-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:6px;}
+
+/* Capacity bar */
+.capacity-wrap{margin-top:18px;}
+.capacity-label{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--text-dim);letter-spacing:.04em;margin-bottom:8px;text-transform:uppercase;}
+.capacity-track{height:4px;border-radius:4px;background:var(--border);overflow:hidden;}
+.capacity-fill{height:100%;background:var(--champagne);border-radius:4px;transition:width .8s ease;}
+.capacity-full{color:#E8A0A0;}
+
+.related{margin-top:100px;}
+.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:30px;}
+.related-card{display:block;text-decoration:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.related-card img{width:100%;aspect-ratio:3/2;object-fit:cover;}
+.related-card .rc-body{padding:16px 18px;}
+.related-card .rc-title{font-family:'Fraunces',serif;font-size:16px;margin-bottom:4px;}
+.related-card .rc-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim);}
+
+.container{max-width:1100px;margin:0 auto;padding:0 clamp(16px, 4vw, 32px);}
+footer{padding:60px 0;text-align:center;border-top:1px solid var(--border);}
+footer a{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);text-decoration:none;}
+
+@media(max-width:860px){
+  nav.top{padding:14px 18px;}
+  .hero-poster{height:45vh;min-height:300px;max-height:460px;}
+  .hero-poster-content{padding:20px 16px;}
+  .event-hero-title{font-size:clamp(26px, 6.5vw, 46px);margin-bottom:12px;}
+  .event-meta-row{gap:14px;font-size:11px;}
+  .event-body{padding:36px 0 60px;}
+  .event-grid{grid-template-columns:1fr;gap:28px;}
+  .side-card{position:static;padding:20px 16px;}
+  .countdown-card{padding:16px 14px;margin-bottom:16px;}
+  .countdown-row{gap:12px;}
+  .cd-num{font-size:24px;}
+  .related{margin-top:48px;}
+  .related-grid{grid-template-columns:1fr;gap:14px;}
+  footer{padding:36px 0;}
+}
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+<div class="toast-stack" id="toastStack"></div>
+
+<nav class="top">
+  <a href="/" class="logo">AOC</a>
+  <a href="/#events" class="back-link">&larr; Back to Events</a>
+</nav>
+
+<div id="eventContent">
+  <div style="height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-style:italic;color:var(--text-dim);">
+    Loading event...
+  </div>
+</div>
+
+<!-- REGISTRATION MODAL (shared markup/styles with homepage) -->
+<div class="modal-overlay" id="registerModal" role="dialog" aria-modal="true" aria-labelledby="registerEventTitle">
+  <div class="modal-box">
+    <button class="modal-close" id="registerClose" aria-label="Close registration form">&times;</button>
+    <div id="registerFormWrap">
+      <div class="event-tag" style="margin-bottom:18px;">Register</div>
+      <h3 class="modal-title" id="registerEventTitle">Event Registration</h3>
+      <form id="registerForm">
+        <input type="hidden" name="event" id="regEventId">
+        <div class="hp-field" aria-hidden="true"><label for="regWebsite2">Leave this field empty</label><input id="regWebsite2" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+        <div class="form-field"><label>Full Name<input name="name" required maxlength="100"></label></div>
+        <div class="form-row">
+          <div class="form-field"><label>Email<input name="email" type="email" required maxlength="150"></label></div>
+          <div class="form-field"><label>Phone<input name="phone" type="tel" required maxlength="20"></label></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>College / Department<input name="department" maxlength="100"></label></div>
+          <div class="form-field"><label>Year
+            <select name="year"><option value="">Select</option><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select>
+          </label></div>
+        </div>
+        <div class="form-field"><label>Message (optional)<textarea name="message" rows="2" maxlength="1000"></textarea></label></div>
+        <button type="submit" class="btn-primary" id="registerSubmitBtn" style="border:none;">Register</button>
+        <div class="form-status" id="registerStatus" role="alert" aria-live="polite"></div>
+      </form>
+    </div>
+    <div class="modal-success" id="registerSuccess" hidden>
+      <div class="success-check">✓</div>
+      <h3>YOU'RE IN.</h3>
+      <p>Your voice has a place in the room.<br>Registration confirmed.</p>
+      <div class="share-row" id="successCalendarRow" style="justify-content:center;"></div>
+      <button class="btn-ghost" id="registerSuccessClose" type="button" style="background:transparent;border:1px solid var(--border);color:var(--ivory);padding:12px 24px;border-radius:100px;cursor:pointer;margin-top:14px;">Close</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <a href="/">AOC — Art of Conversation, MITS Gwalior</a>
+</footer>
+
+<script src="/js/api.js"></script>
+<script>
+function initScrollProgress(){
+  const bar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', ()=>{
+    const h = document.documentElement;
+    bar.style.width = (h.scrollTop/(h.scrollHeight-h.clientHeight)*100) + '%';
+  });
+}
+function showToast(message, type='info'){
+  const stack = document.getElementById('toastStack');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = message;
+  stack.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('show'));
+  setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),450); }, 4200);
+}
+function formatDate(d){
+  return new Date(d).toLocaleDateString('en-US',{day:'2-digit',month:'long',year:'numeric'});
+}
+
+/* ---------- HTML escaping (XSS hardening) — same contract as js/app.js ---------- */
+function escapeHTML(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;',
+  }[char]));
+}
+function safeURL(url) {
+  if (!url) return '';
+  try {
+    const u = new URL(url, window.location.origin);
+    if (u.protocol === 'http:' || u.protocol === 'https:') return u.href;
+  } catch (err) { /* fall through */ }
+  return '';
+}
+
+/* ---------- SEO: update title/meta/OG/canonical + JSON-LD once event data loads ---------- */
+function setEventSEO(ev){
+  document.title = `${ev.title} — AOC | Art of Conversation`;
+  const desc = (ev.description || `${ev.title} — an AOC event at MITS Gwalior.`).slice(0, 155);
+  const url = window.location.href;
+  const img = ev.posterImage || `${window.location.origin}/og-image.jpg`;
+
+  const setMeta = (selector, attr, content) => {
+    let el = document.querySelector(selector);
+    if (!el) {
+      el = document.createElement('meta');
+      const [, key, val] = selector.match(/\[(.+?)="(.+?)"\]/);
+      el.setAttribute(key, val);
+      document.head.appendChild(el);
+    }
+    el.setAttribute(attr, content);
+  };
+  setMeta('meta[name="description"]', 'content', desc);
+  setMeta('meta[property="og:title"]', 'content', `${ev.title} — AOC`);
+  setMeta('meta[property="og:description"]', 'content', desc);
+  setMeta('meta[property="og:image"]', 'content', img);
+  setMeta('meta[property="og:url"]', 'content', url);
+  setMeta('meta[property="og:type"]', 'content', 'website');
+  setMeta('meta[name="twitter:card"]', 'content', 'summary_large_image');
+  setMeta('meta[name="twitter:title"]', 'content', `${ev.title} — AOC`);
+  setMeta('meta[name="twitter:description"]', 'content', desc);
+  setMeta('meta[name="twitter:image"]', 'content', img);
+
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
+  canonical.href = url;
+
+  const ld = document.createElement('script');
+  ld.type = 'application/ld+json';
+  ld.textContent = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: ev.title,
+    startDate: ev.date,
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    eventStatus: 'https://schema.org/EventScheduled',
+    location: { '@type': 'Place', name: ev.venue || 'MITS Gwalior', address: 'MITS Gwalior' },
+    image: [img],
+    description: desc,
+    organizer: { '@type': 'Organization', name: 'AOC — Art of Conversation', url: window.location.origin },
+  }).replace(/</g, '\\u003c'); // guard against a stray closing script tag breaking out of the JSON-LD block
+  document.head.appendChild(ld);
+}
+
+/* ---------- Countdown ---------- */
+let countdownInterval;
+function renderCountdown(targetDate){
+  const el = document.getElementById('countdownRow');
+  if (!el) return;
+  function tick(){
+    const diff = new Date(targetDate).getTime() - Date.now();
+    if (diff <= 0){
+      clearInterval(countdownInterval);
+      document.getElementById('countdownCard').innerHTML = `<div class="countdown-label">This event has started</div>`;
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    el.innerHTML = `
+      <div class="cd-unit"><div class="cd-num">${String(d).padStart(2,'0')}</div><div class="cd-unit-label">Days</div></div>
+      <div class="cd-unit"><div class="cd-num">${String(h).padStart(2,'0')}</div><div class="cd-unit-label">Hours</div></div>
+      <div class="cd-unit"><div class="cd-num">${String(m).padStart(2,'0')}</div><div class="cd-unit-label">Mins</div></div>`;
+  }
+  tick();
+  countdownInterval = setInterval(tick, 60000);
+}
+
+/* ---------- Add to Calendar ---------- */
+function buildCalendarLinks(ev){
+  const start = new Date(ev.date);
+  // If a time string like "5:00 PM" is present, fold it in; otherwise default to a 2hr block from midnight IST-agnostic.
+  let startDt = start, endDt = new Date(start.getTime() + 2*3600000);
+  if (ev.time) {
+    const m = ev.time.match(/(\d{1,2}):?(\d{2})?\s*(AM|PM)?/i);
+    if (m) {
+      let hh = parseInt(m[1],10);
+      const mm = m[2] ? parseInt(m[2],10) : 0;
+      if (m[3] && /pm/i.test(m[3]) && hh < 12) hh += 12;
+      startDt = new Date(start); startDt.setHours(hh, mm, 0, 0);
+      endDt = new Date(startDt.getTime() + 2*3600000);
+    }
+  }
+  const fmt = (d) => d.toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
+  const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ev.title)}&dates=${fmt(startDt)}/${fmt(endDt)}&details=${encodeURIComponent(ev.description||'')}&location=${encodeURIComponent(ev.venue||'MITS Gwalior')}`;
+
+  const ics = [
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//AOC//Event//EN','BEGIN:VEVENT',
+    `UID:${ev.slug}@aoc-mits`,
+    `DTSTART:${fmt(startDt)}`,`DTEND:${fmt(endDt)}`,
+    `SUMMARY:${ev.title}`,
+    `DESCRIPTION:${(ev.description||'').replace(/\n/g,'\\n')}`,
+    `LOCATION:${ev.venue||'MITS Gwalior'}`,
+    'END:VEVENT','END:VCALENDAR',
+  ].join('\r\n');
+  const icsUrl = 'data:text/calendar;charset=utf8,' + encodeURIComponent(ics);
+  return { gcalUrl, icsUrl };
+}
+
+let regTriggerEl = null;
+function trapFocusEv(overlay, e) {
+  if (e.key !== 'Tab') return;
+  const focusable = overlay.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+  if (!focusable.length) return;
+  const first = focusable[0], last = focusable[focusable.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+}
+function openRegisterModal(id, title){
+  regTriggerEl = document.activeElement;
+  document.getElementById('regEventId').value = id;
+  document.getElementById('registerEventTitle').textContent = title;
+  document.getElementById('registerFormWrap').hidden = false;
+  document.getElementById('registerSuccess').hidden = true;
+  document.getElementById('registerForm').reset();
+  document.getElementById('regEventId').value = id;
+  document.getElementById('registerModal').classList.add('open');
+  setTimeout(() => { document.getElementById('registerForm').querySelector('input,textarea,select')?.focus(); }, 50);
+}
+function initRegisterModal(){
+  const overlay = document.getElementById('registerModal');
+  const close = ()=>{ overlay.classList.remove('open'); if (regTriggerEl?.focus) regTriggerEl.focus(); };
+  document.getElementById('registerClose').addEventListener('click', close);
+  document.getElementById('registerSuccessClose').addEventListener('click', close);
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
+  document.addEventListener('keydown', e=>{
+    if (!overlay.classList.contains('open')) return;
+    if(e.key==='Escape') close();
+    else trapFocusEv(overlay, e);
+  });
+
+  document.getElementById('registerForm').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const btn = document.getElementById('registerSubmitBtn');
+    const status = document.getElementById('registerStatus');
+    const payload = Object.fromEntries(new FormData(e.target).entries());
+    btn.disabled = true; btn.textContent = 'Registering...'; status.textContent=''; status.className='form-status';
+    try{
+      await AOC_API.register(payload);
+      document.getElementById('registerFormWrap').hidden = true;
+      document.getElementById('registerSuccess').hidden = false;
+      const calRow = document.getElementById('successCalendarRow');
+      if (calRow && window.CURRENT_EVENT) {
+        const { gcalUrl, icsUrl } = buildCalendarLinks(window.CURRENT_EVENT);
+        calRow.innerHTML = `
+          <a class="share-btn" href="${gcalUrl}" target="_blank" rel="noopener" style="width:auto;">+ Google Cal</a>
+          <a class="share-btn" href="${icsUrl}" download="${window.CURRENT_EVENT.slug}.ics" style="width:auto;">+ iCal</a>`;
+      }
+      showToast('Registration confirmed.', 'success');
+    }catch(err){
+      status.textContent = err.message; status.classList.add('error');
+    }finally{
+      btn.disabled = false; btn.textContent = 'Register';
+    }
+  });
+}
+
+async function loadEvent(){
+  const slug = window.location.pathname.split('/events/')[1];
+  const root = document.getElementById('eventContent');
+  try{
+    const { data: ev, related } = await AOC_API.getEventBySlug(slug);
+    window.CURRENT_EVENT = ev;
+    setEventSEO(ev);
+
+    const isUpcoming = ev.status === 'upcoming';
+    const { gcalUrl, icsUrl } = buildCalendarLinks(ev);
+    const hasCapacity = ev.registrationLimit > 0;
+    const full = hasCapacity && ev.spotsLeft === 0;
+    const pct = hasCapacity ? Math.min(100, Math.round((ev.registeredCount / ev.registrationLimit) * 100)) : 0;
+
+    root.innerHTML = `
+      <div class="hero-poster">
+        <img src="${safeURL(ev.posterImage) || 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=1200&auto=format&fit=crop'}" alt="${escapeHTML(ev.title)}">
+        <div class="hero-poster-content">
+          <div class="event-tag">${escapeHTML(ev.category || '')}</div>
+          <h1 class="event-hero-title">${escapeHTML(ev.title)}</h1>
+          <div class="event-meta-row">
+            <span>${escapeHTML(formatDate(ev.date))}</span>
+            ${ev.time ? `<span>${escapeHTML(ev.time)}</span>` : ''}
+            ${ev.venue ? `<span>${escapeHTML(ev.venue)}</span>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="event-body">
+        <div class="container">
+          <div class="event-grid">
+            <div>
+              <div class="event-section-title">About This Event</div>
+              <div class="event-desc">${escapeHTML(ev.description || 'Details coming soon.')}</div>
+              ${ev.agenda ? `<div class="event-section-title">Agenda</div><div class="event-agenda">${escapeHTML(ev.agenda)}</div>` : ''}
+              ${ev.speaker ? `<div class="event-section-title">Speaker</div><div class="event-desc">${escapeHTML(ev.speaker)}</div>` : ''}
+            </div>
+            <div>
+              ${isUpcoming ? `
+              <div class="countdown-card" id="countdownCard">
+                <div class="countdown-label">Event Starts In</div>
+                <div class="countdown-row" id="countdownRow"></div>
+              </div>` : ''}
+              <div class="side-card">
+                <div class="side-row"><span class="side-label">Date</span><span class="side-value">${escapeHTML(formatDate(ev.date))}</span></div>
+                ${ev.time ? `<div class="side-row"><span class="side-label">Time</span><span class="side-value">${escapeHTML(ev.time)}</span></div>` : ''}
+                ${ev.venue ? `<div class="side-row"><span class="side-label">Venue</span><span class="side-value">${escapeHTML(ev.venue)}</span></div>` : ''}
+                <div class="side-row"><span class="side-label">Category</span><span class="side-value">${escapeHTML(ev.category || '—')}</span></div>
+                ${ev.registrationEnabled
+                  ? (full
+                      ? `<div style="margin-top:24px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#E8A0A0;text-transform:uppercase;letter-spacing:.06em;">Registration Full</div>`
+                      : `<button class="btn-primary" id="sideRegisterBtn">Register Now</button>`)
+                  : `<div style="margin-top:24px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;">Registration Closed</div>`}
+                ${hasCapacity ? `
+                <div class="capacity-wrap">
+                  <div class="capacity-label"><span>${ev.registeredCount} / ${ev.registrationLimit} registered</span><span class="${full?'capacity-full':''}">${full?'FULL':pct+'%'}</span></div>
+                  <div class="capacity-track"><div class="capacity-fill" style="width:${pct}%;"></div></div>
+                </div>` : (ev.registeredCount ? `<div class="capacity-label" style="margin-top:16px;justify-content:center;"><span>${ev.registeredCount} registered</span></div>` : '')}
+                <div class="share-row">
+                  <button class="share-btn" id="shareCopyBtn">Copy Link</button>
+                  <a class="share-btn" href="https://wa.me/?text=${encodeURIComponent(ev.title + ' — ' + window.location.href)}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                  <a class="share-btn" href="${gcalUrl}" target="_blank" rel="noopener noreferrer">+ Google Cal</a>
+                  <a class="share-btn" href="${icsUrl}" download="${escapeHTML(ev.slug)}.ics">+ iCal</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          ${related && related.length ? `
+          <div class="related">
+            <div class="event-section-title">Related Events</div>
+            <div class="related-grid">
+              ${related.map(r => `
+                <a class="related-card" href="/events/${escapeHTML(r.slug)}">
+                  <img src="${safeURL(r.posterImage) || 'https://images.unsplash.com/photo-1591115765373-5207764f72e4?q=80&w=600&auto=format&fit=crop'}" alt="${escapeHTML(r.title)}" loading="lazy">
+                  <div class="rc-body"><div class="rc-title">${escapeHTML(r.title)}</div><div class="rc-date">${escapeHTML(formatDate(r.date))}</div></div>
+                </a>`).join('')}
+            </div>
+          </div>` : ''}
+        </div>
+      </div>
+    `;
+
+    if (isUpcoming) renderCountdown(ev.date);
+
+    const regBtn = document.getElementById('sideRegisterBtn');
+    if(regBtn) regBtn.addEventListener('click', ()=>openRegisterModal(ev._id, ev.title));
+
+    const copyBtn = document.getElementById('shareCopyBtn');
+    if(copyBtn) copyBtn.addEventListener('click', ()=>{
+      navigator.clipboard.writeText(window.location.href).then(()=>showToast('Link copied.', 'success'));
+    });
+  }catch(err){
+    root.innerHTML = `<div style="height:100vh;display:flex;flex-direction:column;gap:16px;align-items:center;justify-content:center;text-align:center;padding:20px;">
+      <div style="font-family:'Fraunces',serif;font-style:italic;font-size:24px;color:#A3A3A8;">Something interrupted the signal.</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#666;">${escapeHTML(err.message)}</div>
+      <a href="/" style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--champagne);text-decoration:none;">&larr; Back Home</a>
+    </div>`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  initScrollProgress();
+  initRegisterModal();
+  loadEvent();
+});
+</script>
+</body>
+</html>

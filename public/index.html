@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>AOC — Art of Conversation | MITS Gwalior</title>
+<meta name="description" content="AOC — Art of Conversation is a student-led communication community at MITS Gwalior. Practice public speaking, debate, impromptu thinking and leadership. Join a session, watch the archive, or come speak at the next event.">
+<meta name="theme-color" content="#030303">
+<link rel="canonical" href="/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+<!-- Open Graph / social preview -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AOC — Art of Conversation">
+<meta property="og:title" content="AOC — Art of Conversation | MITS Gwalior">
+<meta property="og:description" content="Where voices become influence. A student communication community built around speaking, debate, and leadership — MITS Gwalior.">
+<meta property="og:image" content="/og-image.jpg">
+<meta property="og:url" content="/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AOC — Art of Conversation | MITS Gwalior">
+<meta name="twitter:description" content="Where voices become influence. A student communication community — MITS Gwalior.">
+<meta name="twitter:image" content="/og-image.jpg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/extra.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "AOC — Art of Conversation",
+  "alternateName": "AOC",
+  "url": "/",
+  "description": "A student-led communication community at MITS Gwalior focused on public speaking, debate, and leadership.",
+  "parentOrganization": {
+    "@type": "CollegeOrUniversity",
+    "name": "Madhav Institute of Technology & Science, Gwalior"
+  }
+}
+</script>
+<style>
+:root{
+  --bg:#030303;
+  --surface:#0D0D0F;
+  --card:#151518;
+  --text:#FAF8F4;
+  --text-dim:#A3A3A8;
+  --border:rgba(255,255,255,0.05);
+  --ivory:#F6E8BE;
+  --champagne:#E7D9B0;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{background:var(--bg);overflow-x:hidden;max-width:100vw;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden;max-width:100vw;-webkit-font-smoothing:antialiased;}
+::selection{background:var(--champagne);color:#030303;}
+
+.noise{position:fixed;inset:0;pointer-events:none;z-index:998;opacity:0.03;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+/* ===== INTRO CURTAIN (chapter 0) ===== */
+.curtain{
+  position:fixed;inset:0;background:#030303;z-index:1000;
+  display:flex;align-items:center;justify-content:center;
+}
+.curtain-spot{
+  position:absolute;width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle, rgba(246,232,190,0.08) 0%, rgba(246,232,190,0.02) 40%, transparent 70%);
+  opacity:0;
+}
+.curtain-text{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:300;
+  font-size:clamp(22px,3.2vw,42px);color:var(--champagne);opacity:0;letter-spacing:0.01em;
+  text-align:center;position:relative;padding:0 20px;
+}
+
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:0.28em;text-transform:uppercase;color:var(--champagne);display:flex;align-items:center;gap:10px;}
+.eyebrow::before{content:"";width:22px;height:1px;background:var(--champagne);opacity:.6;}
+h1,h2,h3{font-family:'Fraunces',serif;font-weight:400;line-height:1.05;letter-spacing:-0.015em;}
+.container{max-width:1320px;margin:0 auto;padding:0 clamp(16px, 4vw, 40px);}
+section{position:relative;}
+
+.spotlight-cursor{
+  position:fixed;width:460px;height:460px;border-radius:50%;pointer-events:none;z-index:2;
+  background:radial-gradient(circle, rgba(246,232,190,0.045) 0%, rgba(246,232,190,0) 70%);
+  transform:translate(-50%,-50%);
+}
+
+/* ===== NAVBAR ===== */
+.navbar{
+  position:fixed;top:22px;left:50%;transform:translateX(-50%) translateY(-140%);
+  width:min(92%,1120px);z-index:200;display:flex;align-items:center;justify-content:space-between;
+  padding:14px 26px;border-radius:100px;background:rgba(3,3,3,0.4);border:1px solid var(--border);
+  backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);
+  transition:background .5s ease, border-color .5s ease;
+}
+.navbar.scrolled{background:rgba(3,3,3,0.85);border-color:rgba(255,255,255,0.09);}
+.nav-logo{font-family:'Fraunces',serif;font-size:17px;letter-spacing:0.1em;}
+.nav-links{display:flex;gap:36px;list-style:none;}
+.nav-links a{color:var(--text-dim);text-decoration:none;font-size:12.5px;letter-spacing:0.04em;position:relative;padding-bottom:2px;transition:color .3s ease;}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:-3px;width:0;height:1px;background:var(--champagne);transition:width .4s cubic-bezier(.4,0,.2,1);}
+.nav-links a:hover{color:var(--text);}
+.nav-links a:hover::after{width:100%;}
+.nav-links a.active{color:var(--champagne);}
+.nav-links a.active::after{width:100%;}
+.nav-join{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:#030303;background:var(--champagne);padding:9px 20px;border-radius:100px;text-decoration:none;transition:transform .3s ease, box-shadow .3s ease;}
+.nav-join:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(231,217,176,0.2);}
+
+/* ===== HERO ===== */
+.hero{height:100vh;min-height:700px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;text-align:center;overflow:hidden;}
+.hero-spotlight{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle, rgba(246,232,190,0.14) 0%, rgba(246,232,190,0.04) 40%, rgba(246,232,190,0) 72%);
+  filter:blur(14px);pointer-events:none;}
+#dust-canvas{position:absolute;inset:0;pointer-events:none;}
+.hero-chapter-text{
+  position:absolute;font-family:'Fraunces',serif;font-style:italic;font-weight:300;
+  font-size:clamp(20px,3vw,38px);color:var(--champagne);opacity:0;letter-spacing:0.01em;text-align:center;
+  max-width:80vw;
+}
+.hero-eyebrow{margin-bottom:30px;opacity:0;}
+.hero-title{font-size:clamp(40px,10vw,148px);font-weight:500;letter-spacing:-0.02em;text-transform:uppercase;line-height:0.92;opacity:0;}
+.hero-title span{display:block;overflow:hidden;}
+.hero-title span b{display:block;font-weight:500;transform:translateY(115%);}
+.hero-title .accent{color:var(--champagne);}
+.hero-cta-row{margin-top:46px;display:flex;gap:22px;align-items:center;opacity:0;}
+.btn-primary{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;background:var(--champagne);color:#030303;padding:16px 34px;border-radius:100px;text-decoration:none;display:inline-block;transition:transform .35s cubic-bezier(.4,0,.2,1);cursor:pointer;}
+.btn-primary:hover{transform:translateY(-2px);}
+.btn-ghost{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);text-decoration:none;padding:16px 8px;border-bottom:1px solid var(--border);transition:color .3s ease, border-color .3s ease;cursor:pointer;}
+.btn-ghost:hover{color:var(--text);border-color:var(--champagne);}
+.hero-scroll{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;}
+.hero-scroll-line{width:1px;height:46px;background:linear-gradient(to bottom, var(--champagne), transparent);animation:scrollpulse 2.4s ease-in-out infinite;}
+@keyframes scrollpulse{0%,100%{opacity:.25;}50%{opacity:.9;}}
+.hero-scroll span{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.22em;color:var(--text-dim);text-transform:uppercase;}
+
+.soundwave{display:flex;align-items:center;justify-content:center;gap:3px;height:26px;}
+.soundwave span{width:2px;background:var(--champagne);border-radius:2px;opacity:0.55;}
+
+.act-label{display:flex;align-items:center;gap:16px;margin-bottom:clamp(32px, 5vw, 60px);}
+.act-num{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--champagne);letter-spacing:.1em;}
+.act-line{flex:1;height:1px;background:var(--border);}
+.act-name{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--text-dim);}
+
+/* ===== WHY WE EXIST ===== */
+.why{padding:clamp(80px, 14vw, 220px) 0 clamp(60px, 11vw, 170px);}
+.why-grid{display:grid;grid-template-columns:0.9fr 1.1fr;gap:clamp(36px, 6vw, 90px);align-items:center;}
+.why-visual{position:relative;aspect-ratio:4/5;border-radius:4px;overflow:hidden;}
+.why-visual img{width:100%;height:100%;object-fit:cover;filter:grayscale(0.55) brightness(0.55) contrast(1.05);}
+.why-visual::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg, transparent 40%, rgba(3,3,3,0.7));}
+.why-quote{font-size:clamp(26px,3.6vw,52px);line-height:1.16;font-weight:400;letter-spacing:-0.01em;}
+.why-quote em{color:var(--champagne);font-style:italic;}
+.why-body p{color:var(--text-dim);font-size:16px;line-height:1.85;font-weight:300;margin-top:22px;max-width:460px;}
+.why-stats{display:flex;gap:clamp(24px, 4vw, 56px);margin-top:36px;}
+.why-stat b{font-family:'Fraunces',serif;font-size:clamp(28px, 3.5vw, 36px);font-weight:400;color:var(--champagne);display:block;}
+.why-stat span{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--text-dim);text-transform:uppercase;}
+
+/* ===== WHY JOIN ===== */
+.why-join{padding:0 0 clamp(60px, 11vw, 170px);}
+.why-join-head{max-width:640px;margin-bottom:clamp(32px, 5vw, 80px);}
+.why-join-head h2{font-size:clamp(28px,4.4vw,60px);}
+.why-join-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border);}
+.wj-item{background:var(--surface);padding:clamp(28px, 3.5vw, 42px) clamp(22px, 3vw, 32px);transition:background .4s ease;}
+.wj-item:hover{background:var(--card);}
+.wj-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--champagne);letter-spacing:.1em;display:block;margin-bottom:24px;opacity:.85;}
+.wj-title{font-size:clamp(18px, 2.2vw, 21px);margin-bottom:10px;}
+.wj-copy{color:var(--text-dim);font-size:13.5px;line-height:1.65;font-weight:300;}
+
+/* ===== JOURNEY ===== */
+.journey{padding:clamp(60px, 10vw, 130px) 0 clamp(60px, 12vw, 190px);position:relative;}
+.journey-head{max-width:640px;margin-bottom:clamp(40px, 7vw, 130px);}
+.journey-head h2{font-size:clamp(28px,4.6vw,66px);}
+.timeline{position:relative;max-width:840px;margin:0 auto;}
+.timeline-track{position:absolute;left:22px;top:0;bottom:0;width:1px;background:var(--border);}
+.timeline-fill{position:absolute;left:22px;top:0;width:1px;height:0%;background:linear-gradient(to bottom, var(--champagne), rgba(231,217,176,0.15));box-shadow:0 0 16px rgba(246,232,190,0.35);}
+.tl-item{position:relative;padding:0 0 clamp(44px, 8vw, 108px) clamp(44px, 6vw, 78px);}
+.tl-item:last-child{padding-bottom:0;}
+.tl-dot{position:absolute;left:14px;top:4px;width:17px;height:17px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;transition:box-shadow .6s ease;}
+.tl-dot::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--text-dim);transition:background .6s ease, box-shadow .6s ease;}
+.tl-item.active .tl-dot::after{background:var(--champagne);box-shadow:0 0 12px rgba(246,232,190,0.85);}
+.tl-item.active .tl-dot{border-color:var(--champagne);box-shadow:0 0 20px rgba(246,232,190,0.15);}
+.tl-label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.16em;color:var(--champagne);text-transform:uppercase;margin-bottom:8px;opacity:.85;}
+.tl-title{font-size:clamp(22px,3vw,40px);margin-bottom:10px;transition:opacity .6s ease;opacity:.35;}
+.tl-item.active .tl-title{opacity:1;}
+.tl-desc{color:var(--text-dim);font-size:clamp(13.5px, 1.8vw, 15px);line-height:1.7;font-weight:300;max-width:480px;}
+
+/* ===== EXPERIENCE STRIP ===== */
+.experience{padding:0 0 clamp(60px, 12vw, 190px);}
+.exp-head{max-width:640px;margin-bottom:clamp(32px, 6vw, 90px);}
+.exp-head h2{font-size:clamp(28px,4.6vw,66px);}
+.exp-strip{display:flex;overflow-x:auto;gap:1px;background:var(--border);scrollbar-width:none;}
+.exp-strip::-webkit-scrollbar{display:none;}
+.exp-card{min-width:260px;flex:1;background:var(--surface);padding:clamp(28px, 4vw, 46px) clamp(20px, 2.5vw, 30px);transition:background .4s ease;position:relative;}
+.exp-card:hover{background:var(--card);}
+.exp-index{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--champagne);margin-bottom:clamp(24px, 4vw, 62px);display:block;opacity:.8;}
+.exp-name{font-family:'Fraunces',serif;font-size:clamp(18px, 2.2vw, 22px);margin-bottom:10px;}
+.exp-copy{color:var(--text-dim);font-size:13.5px;line-height:1.65;font-weight:300;}
+
+/* ===== EVENTS — POSTERS ===== */
+.events{padding:0 0 clamp(60px, 12vw, 190px);}
+.events-head{margin-bottom:clamp(32px, 6vw, 90px);}
+.events-head h2{font-size:clamp(28px,4.6vw,66px);max-width:600px;}
+.poster-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.poster{position:relative;aspect-ratio:3/4.3;overflow:hidden;cursor:pointer;transition:transform .7s cubic-bezier(.16,1,.3,1);}
+.poster:hover{transform:translateY(-10px);}
+.poster img{width:100%;height:100%;object-fit:cover;filter:grayscale(0.5) brightness(0.5);transition:transform .9s cubic-bezier(.16,1,.3,1), filter .7s ease;}
+.poster:hover img{transform:scale(1.05);filter:grayscale(0.1) brightness(0.68);}
+.poster-overlay{position:absolute;inset:0;background:linear-gradient(180deg, rgba(3,3,3,0) 35%, rgba(3,3,3,0.9) 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:24px;}
+.poster-date{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.15em;color:var(--champagne);text-transform:uppercase;margin-bottom:8px;opacity:.9;}
+.poster-title{font-family:'Fraunces',serif;font-size:clamp(20px, 2.5vw, 24px);line-height:1.1;margin-bottom:6px;}
+.poster-type{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;}
+
+/* ===== GALLERY — FEATURED EDITORIAL MOSAIC ===== */
+.gallery{padding:0 0 clamp(60px, 12vw, 190px);}
+.gallery-head{max-width:640px;margin-bottom:clamp(28px, 5vw, 60px);}
+.gallery-head h2{font-size:clamp(28px,4.6vw,66px);}
+
+.exhibit-mosaic{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:210px;gap:12px;}
+.mosaic-item{position:relative;border-radius:6px;overflow:hidden;cursor:pointer;background:var(--surface);border:1px solid var(--border);}
+.mosaic-item img{width:100%;height:100%;object-fit:cover;filter:grayscale(0.4) brightness(0.65);transition:filter .5s ease, transform .6s cubic-bezier(.16,1,.3,1);}
+.mosaic-item:hover img{filter:grayscale(0) brightness(0.85);transform:scale(1.04);}
+.mosaic-item.feature{grid-column:span 2;grid-row:span 2;}
+.mosaic-item.wide{grid-column:span 2;}
+.mosaic-item.tall{grid-row:span 2;}
+
+.gallery-cta-wrap{margin-top:clamp(28px, 5vw, 52px);display:flex;justify-content:center;}
+.gallery-cta{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--champagne);
+  background:transparent;border:1px solid rgba(231,217,176,0.3);padding:14px 30px;border-radius:100px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:10px;transition:all .35s ease;min-height:44px;}
+.gallery-cta:hover{background:rgba(231,217,176,0.08);border-color:var(--champagne);transform:translateY(-2px);box-shadow:0 8px 24px rgba(231,217,176,0.12);}
+.gallery-cta .cta-arrow{transition:transform .3s ease;}
+.gallery-cta:hover .cta-arrow{transform:translateX(5px);}
+
+/* ===== TESTIMONIALS — DOMINANT QUOTE ===== */
+.testimonials{padding:clamp(80px, 12vw, 200px) 0 clamp(80px, 12vw, 210px);position:relative;}
+.testi-wrap{max-width:920px;margin:0 auto;text-align:center;position:relative;min-height:clamp(260px, 30vw, 380px);}
+.testi-mark{font-family:'Fraunces',serif;font-size:clamp(80px, 12vw, 160px);color:var(--champagne);opacity:0.1;line-height:1;position:absolute;top:clamp(-36px, -4vw, -60px);left:50%;transform:translateX(-50%);}
+.testi-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+.testi-slide.active{opacity:1;pointer-events:auto;}
+.testi-portrait{width:clamp(48px, 5vw, 64px);height:clamp(48px, 5vw, 64px);border-radius:50%;overflow:hidden;margin-bottom:20px;filter:grayscale(0.3);}
+.testi-portrait img{width:100%;height:100%;object-fit:cover;}
+.testi-quote{font-family:'Fraunces',serif;font-size:clamp(18px,2.5vw,36px);font-style:italic;line-height:1.45;margin-bottom:24px;font-weight:400;padding:0 10px;}
+.testi-name{font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.05em;color:var(--champagne);}
+.testi-role{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--text-dim);margin-top:4px;letter-spacing:.05em;}
+.testi-dots{display:flex;gap:10px;justify-content:center;margin-top:40px;}
+.testi-dot{width:8px;height:8px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .4s ease, transform .4s ease;}
+.testi-dot.active{background:var(--champagne);transform:scale(1.3);}
+
+/* ===== TEAM — EDITORIAL PANELS ===== */
+.team{padding:0 0 clamp(60px, 12vw, 190px);}
+.team-head{max-width:640px;margin-bottom:clamp(32px, 6vw, 90px);}
+.team-head h2{font-size:clamp(28px,4.6vw,66px);}
+.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;}
+.team-card{position:relative;aspect-ratio:3/4.4;overflow:hidden;cursor:pointer;}
+.team-card img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) brightness(0.5);transition:filter .7s ease, transform .9s ease;}
+.team-card:hover img{filter:grayscale(0.15) brightness(0.68);transform:scale(1.04);}
+.team-info{position:absolute;left:0;right:0;bottom:0;padding:20px;background:linear-gradient(180deg, transparent, rgba(3,3,3,0.95));}
+.team-name{font-family:'Fraunces',serif;font-size:18px;margin-bottom:4px;}
+.team-role{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:var(--champagne);text-transform:uppercase;margin-bottom:8px;opacity:.85;}
+.team-quote{font-family:'Fraunces',serif;font-style:italic;font-size:12px;color:var(--text-dim);max-height:0;overflow:hidden;opacity:0;transition:max-height .5s ease, opacity .4s ease;}
+.team-card:hover .team-quote{max-height:60px;opacity:1;}
+.team-social{display:flex;gap:12px;margin-top:10px;max-height:0;overflow:hidden;opacity:0;transition:max-height .5s ease, opacity .4s ease;}
+.team-card:hover .team-social{max-height:20px;opacity:1;}
+.team-social a{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--text-dim);text-decoration:none;letter-spacing:.05em;}
+.team-social a:hover{color:var(--champagne);}
+
+/* ===== FINAL CTA — FADE TO DARK ===== */
+.final-cta{height:100vh;min-height:640px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;background:#000;padding:60px 20px;}
+.final-spot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle, rgba(246,232,190,0.12) 0%, rgba(246,232,190,0.03) 45%, transparent 72%);filter:blur(16px);}
+.final-cta h2{font-size:clamp(32px,6.5vw,88px);margin-bottom:0;letter-spacing:-0.01em;opacity:0;position:relative;z-index:2;}
+.final-cta h2 em{color:var(--champagne);font-style:italic;}
+.final-cta .btn-primary{margin-top:36px;opacity:0;position:relative;z-index:2;}
+
+/* ===== FOOTER ===== */
+footer{border-top:1px solid var(--border);padding:clamp(48px, 8vw, 90px) 0 36px;background:#000;}
+.footer-huge{font-family:'Fraunces',serif;font-size:clamp(42px,14vw,230px);line-height:0.85;color:#0D0D0F;-webkit-text-stroke:1px var(--border);text-align:center;margin-bottom:16px;letter-spacing:-0.02em;}
+.footer-tag{text-align:center;font-family:'Fraunces',serif;font-style:italic;color:var(--text-dim);font-size:15px;margin-bottom:44px;}
+.footer-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;padding-top:28px;border-top:1px solid var(--border);}
+.footer-links{display:flex;gap:24px;list-style:none;}
+.footer-links a{color:var(--text-dim);text-decoration:none;font-size:13px;transition:color .3s ease;}
+.footer-links a:hover{color:var(--champagne);}
+.footer-meta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--text-dim);letter-spacing:.05em;}
+
+.reveal{opacity:0;transform:translateY(24px);}
+
+@media(max-width:1024px){
+  .why-grid{grid-template-columns:1fr;gap:36px;}
+  .poster-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+  .team-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+  .exp-card{min-width:45%;}
+  .exhibit{height:380px;gap:14px;}
+}
+
+@media(max-width:768px){
+  .navbar{top:12px;width:min(94%, 1120px);padding:10px 18px;}
+  .nav-logo{font-size:16px;}
+  .nav-links{display:none;}
+  .nav-join{padding:8px 16px;font-size:10px;min-height:40px;display:inline-flex;align-items:center;}
+  .nav-hamburger{display:flex;width:44px;height:44px;align-items:center;justify-content:center;}
+  
+  .hero{height:100svh;min-height:500px;max-height:740px;padding:70px 0 30px;}
+  .hero-title{font-size:clamp(32px, 8.5vw, 60px);}
+  .hero-cta-row{margin-top:24px;gap:12px;}
+  .hero-scroll{bottom:16px;gap:6px;}
+  .hero-scroll-line{height:28px;}
+
+  .why{padding:56px 0 40px;}
+  .why-visual{aspect-ratio:16/10;max-height:240px;width:100%;}
+  .why-quote{font-size:clamp(22px, 4.8vw, 34px);}
+  .why-body p{margin-top:14px;font-size:14.5px;line-height:1.65;}
+  .why-stats{gap:24px;margin-top:24px;}
+  .why-stat b{font-size:28px;}
+
+  .why-join{padding:0 0 48px;}
+  .why-join-head{margin-bottom:28px;}
+  .why-join-grid{grid-template-columns:1fr;gap:2px;}
+  .wj-item{padding:22px 18px;}
+  .wj-num{margin-bottom:12px;}
+
+  .journey{padding:48px 0;}
+  .journey-head{margin-bottom:32px;}
+  .timeline-track, .timeline-fill{left:14px;}
+  .tl-item{padding:0 0 32px 42px;}
+  .tl-dot{left:6px;top:2px;width:15px;height:15px;}
+  .tl-title{font-size:clamp(20px, 3.8vw, 28px);margin-bottom:6px;}
+  .tl-desc{font-size:13.5px;line-height:1.6;}
+
+  .experience{padding:0 0 48px;}
+  .exp-head{margin-bottom:28px;}
+  .exp-card{min-width:78%;padding:22px 18px;}
+  .exp-index{margin-bottom:20px;}
+  .exp-name{font-size:18px;}
+
+  .events{padding:0 0 48px;}
+  .events-head{margin-bottom:28px;}
+  .poster-grid{grid-template-columns:1fr;gap:14px;}
+  .poster{aspect-ratio:16/11;max-height:300px;}
+  .poster-overlay{padding:18px;}
+  .poster-title{font-size:19px;}
+
+  .gallery{padding:0 0 48px;}
+  .gallery-head{margin-bottom:24px;}
+  .exhibit-mosaic{grid-template-columns:repeat(2,1fr);grid-auto-rows:125px;gap:8px;}
+  .mosaic-item.feature{grid-column:span 2;grid-row:span 2;}
+  .mosaic-item.wide{grid-column:span 2;grid-row:span 1;}
+  .mosaic-item.tall{grid-column:span 1;grid-row:span 2;}
+
+  .testimonials{padding:56px 0;min-height:260px;}
+  .testi-wrap{min-height:220px;}
+  .testi-mark{font-size:70px;top:-20px;}
+  .testi-portrait{width:48px;height:48px;margin-bottom:14px;}
+  .testi-quote{font-size:clamp(16px, 3.8vw, 22px);margin-bottom:16px;line-height:1.42;}
+  .testi-dots{margin-top:24px;}
+
+  .team{padding:0 0 48px;}
+  .team-head{margin-bottom:28px;}
+  .team-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .team-card{aspect-ratio:3/4;}
+  .team-info{padding:14px 12px;}
+  .team-name{font-size:15px;}
+  .team-role{font-size:9px;margin-bottom:4px;}
+  .team-quote, .team-social{max-height:none;opacity:1;margin-top:4px;}
+  .team-quote{font-size:11px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+  .final-cta{min-height:340px;padding:56px 0;}
+  .final-cta h2{font-size:clamp(26px, 5.5vw, 44px);}
+  .final-cta .btn-primary{margin-top:24px;}
+
+  footer{padding:40px 0 24px;}
+  .footer-huge{font-size:clamp(36px, 12vw, 90px);margin-bottom:10px;}
+  .footer-tag{font-size:13.5px;margin-bottom:28px;}
+  .footer-row{flex-direction:column;align-items:center;text-align:center;gap:16px;padding-top:20px;}
+  .footer-links{gap:16px;justify-content:center;flex-wrap:wrap;}
+}
+
+@media(max-width:480px){
+  .hero-cta-row{flex-direction:column;width:100%;max-width:280px;margin-left:auto;margin-right:auto;}
+  .hero-cta-row .btn-primary, .hero-cta-row .btn-ghost{width:100%;text-align:center;justify-content:center;}
+  .exhibit{grid-template-columns:1fr;}
+  .exhibit-item{aspect-ratio:16/10;}
+  .team-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .team-info{padding:10px 8px;}
+  .team-name{font-size:14px;}
+}
+
+@media(prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important;}}
+</style>
+</head>
+<body>
+
+<div class="noise"></div>
+<div class="spotlight-cursor" id="cursorSpot"></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+<div class="toast-stack" id="toastStack"></div>
+
+<!-- CURTAIN INTRO -->
+<div class="curtain" id="curtain">
+  <div class="curtain-spot" id="curtainSpot"></div>
+  <div class="curtain-text" id="curtainText">Silence.</div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-logo">AOC</div>
+  <ul class="nav-links">
+    <li><a href="#journey">Journey</a></li>
+    <li><a href="#events">Events</a></li>
+    <li><a href="#archive">Archive</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#team">Leadership</a></li>
+  </ul>
+  <button class="nav-join" id="navJoinBtn" type="button">Join</button>
+  <button class="nav-hamburger" id="navHamburger" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <a href="#journey">Journey</a>
+  <a href="#events">Events</a>
+  <a href="#archive">Archive</a>
+  <a href="#gallery">Gallery</a>
+  <a href="#team">Leadership</a>
+  <a href="#contact">Contact</a>
+  <button class="btn-primary" id="mobileJoinBtn" type="button">Join AOC</button>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-spotlight" id="heroSpot"></div>
+  <canvas id="dust-canvas"></canvas>
+  <div class="container" style="position:relative;z-index:3;">
+    <div class="hero-eyebrow" id="heroEyebrow" style="justify-content:center;">
+      <span class="eyebrow">Art of Conversation · MITS</span>
+    </div>
+    <h1 class="hero-title" id="heroTitle">
+      <span><b>Where</b></span>
+      <span><b>Voices</b></span>
+      <span><b class="accent">Become</b></span>
+      <span><b class="accent">Influence</b></span>
+    </h1>
+    <div class="hero-cta-row" id="heroCta">
+      <button class="btn-primary" id="heroJoinBtn" type="button">Take the Stage</button>
+      <a href="#why" class="btn-ghost">Explore AOC</a>
+    </div>
+  </div>
+  <div class="hero-scroll" id="heroScroll">
+    <div class="soundwave" id="heroWave"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- WHY WE EXIST -->
+<section class="why" id="why">
+  <div class="container">
+    <div class="act-label reveal">
+      <span class="act-num">CHAPTER I</span>
+      <div class="act-line"></div>
+      <span class="act-name">Why We Exist</span>
+    </div>
+    <div class="why-grid">
+      <div class="why-visual reveal">
+        <img src="https://images.unsplash.com/photo-1478147427282-58a87a120781?q=80&w=900&auto=format&fit=crop" alt="Empty stage before a speech">
+      </div>
+      <div>
+        <div class="why-quote reveal">
+          The first word is the hardest.
+          <em>Everything after it is momentum.</em>
+        </div>
+        <div class="why-body reveal">
+          <p><strong style="color:var(--text);font-weight:500;">AOC — Art of Conversation</strong> is a student-led communication community at MITS · Gwalior. A space to practice speaking, listening, debate, impromptu thinking, leadership and networking.</p>
+          <p>AOC was never built to teach public speaking. It was built to dismantle the fear that keeps brilliant people silent — in classrooms, boardrooms, and moments that matter.</p>
+          <p>We believe a voice, once found, doesn't go quiet again. Every session is designed around one outcome: a student who no longer hesitates before they speak.</p>
+        </div>
+        <div class="why-stats reveal">
+          <div class="why-stat"><b data-counter="voicesTrained" data-suffix="+">0</b><span>Voices Trained</span></div>
+          <div class="why-stat"><b data-counter="sessionsHeld">0</b><span>Sessions Held</span></div>
+          <div class="why-stat"><b data-counter="yearsRunning" data-pad="2">00</b><span>Years Running</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY JOIN AOC -->
+<section class="why-join" id="why-join">
+  <div class="container">
+    <div class="act-label reveal">
+      <span class="act-num">CHAPTER I·B</span>
+      <div class="act-line"></div>
+      <span class="act-name">Why Join</span>
+    </div>
+    <div class="why-join-head reveal">
+      <h2>Why Join AOC?</h2>
+    </div>
+    <div class="why-join-grid">
+      <div class="wj-item reveal"><span class="wj-num">01</span><h3 class="wj-title">Speak with confidence</h3><p class="wj-copy">Lose the shake in your voice. Learn to hold a room instead of hoping it doesn't notice you.</p></div>
+      <div class="wj-item reveal"><span class="wj-num">02</span><h3 class="wj-title">Think under pressure</h3><p class="wj-copy">Table topics train you to respond, not freeze, when a question catches you off guard.</p></div>
+      <div class="wj-item reveal"><span class="wj-num">03</span><h3 class="wj-title">Learn structured debate</h3><p class="wj-copy">Build an argument, defend it, and still listen — conviction and open ears at once.</p></div>
+      <div class="wj-item reveal"><span class="wj-num">04</span><h3 class="wj-title">Build leadership skills</h3><p class="wj-copy">Run a session, host an event, lead a table. Leadership here is practiced, not just discussed.</p></div>
+      <div class="wj-item reveal"><span class="wj-num">05</span><h3 class="wj-title">Meet ambitious students</h3><p class="wj-copy">A room of people who show up on purpose to get better — that company changes you too.</p></div>
+      <div class="wj-item reveal"><span class="wj-num">06</span><h3 class="wj-title">Gain real stage experience</h3><p class="wj-copy">Real lights, a real audience, real stakes — the fastest way to actually get comfortable on stage.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- JOURNEY -->
+<section class="journey" id="journey">
+  <div class="container">
+    <div class="act-label reveal">
+      <span class="act-num">CHAPTER II</span>
+      <div class="act-line"></div>
+      <span class="act-name">The Transformation</span>
+    </div>
+    <div class="journey-head reveal">
+      <h2>The Journey</h2>
+    </div>
+    <div class="timeline">
+      <div class="timeline-track"></div>
+      <div class="timeline-fill" id="tlFill"></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-label">Stage 00</div><h3 class="tl-title">Silence</h3><p class="tl-desc">Before anything else, there is quiet — the space where a voice hasn't spoken yet.</p></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-label">Stage 01</div><h3 class="tl-title">Fear</h3><p class="tl-desc">You walk in unsure your voice deserves the room. That discomfort is the starting line, not a flaw to hide.</p></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-label">Stage 02</div><h3 class="tl-title">Practice</h3><p class="tl-desc">Weekly reps in a room built for failure without judgment. You speak badly on purpose, until you don't.</p></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-label">Stage 03</div><h3 class="tl-title">Confidence</h3><p class="tl-desc">The pause before you speak stops feeling like panic. It starts feeling like control.</p></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-label">Stage 04</div><h3 class="tl-title">Leadership</h3><p class="tl-desc">Rooms start turning to you first. Not because you're the loudest — because you're the clearest.</p></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-label">Stage 05</div><h3 class="tl-title">Legacy</h3><p class="tl-desc">You start pulling the next hesitant voice into the room. The transformation repeats itself.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section class="experience" id="experience">
+  <div class="container">
+    <div class="act-label reveal"><span class="act-num">CHAPTER III</span><div class="act-line"></div><span class="act-name">The Stage</span></div>
+    <div class="exp-head reveal"><h2>Inside a Session</h2></div>
+  </div>
+  <div class="container">
+    <div class="exp-strip reveal">
+      <div class="exp-card"><span class="exp-index">01</span><div class="exp-name">Warm-up</div><p class="exp-copy">Vocal and mental resets. Every session begins by lowering the stakes before raising the bar.</p></div>
+      <div class="exp-card"><span class="exp-index">02</span><div class="exp-name">Table Topics</div><p class="exp-copy">Unscripted, unrehearsed, unforgiving. This is where hesitation gets trained out of you.</p></div>
+      <div class="exp-card"><span class="exp-index">03</span><div class="exp-name">Public Speaking</div><p class="exp-copy">Prepared speeches, delivered under real lights, to a real room, with real stakes.</p></div>
+      <div class="exp-card"><span class="exp-index">04</span><div class="exp-name">Debate</div><p class="exp-copy">Structured conflict. You learn to hold a position and still hold the room.</p></div>
+      <div class="exp-card"><span class="exp-index">05</span><div class="exp-name">Feedback</div><p class="exp-copy">Direct, specific, kind. Feedback that changes how you speak by next week.</p></div>
+      <div class="exp-card"><span class="exp-index">06</span><div class="exp-name">Networking</div><p class="exp-copy">The unscripted part. Where the skills get tested in a conversation, not a speech.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- EVENTS -->
+<section class="events" id="events">
+  <div class="container">
+    <div class="events-head reveal">
+      <div class="act-label" style="margin-bottom:24px;"><span class="act-num">SEASON 08</span><div class="act-line"></div><span class="act-name">Events</span></div>
+      <h2>The Season Ahead</h2>
+    </div>
+    <div class="poster-grid" id="eventsGrid">
+      <div class="skeleton-poster"></div><div class="skeleton-poster"></div><div class="skeleton-poster"></div>
+    </div>
+    <div class="empty-state" id="eventsEmpty" hidden>NOTHING ON THE STAGE YET.<span>New events are coming soon.</span></div>
+  </div>
+</section>
+
+<!-- PREVIOUS SESSIONS / ARCHIVE -->
+<section class="archive" id="archive">
+  <div class="container">
+    <div class="act-label reveal"><span class="act-num">ARCHIVE</span><div class="act-line"></div><span class="act-name">Previous Sessions</span></div>
+    <div class="events-head reveal"><h2>What Already Happened</h2></div>
+    <div class="archive-controls reveal">
+      <div class="archive-filters" id="archiveFilters">
+        <button class="filter-chip active" data-cat="All">All</button>
+        <button class="filter-chip" data-cat="Public Speaking">Public Speaking</button>
+        <button class="filter-chip" data-cat="Debate">Debate</button>
+        <button class="filter-chip" data-cat="Table Topics">Table Topics</button>
+        <button class="filter-chip" data-cat="Leadership">Leadership</button>
+        <button class="filter-chip" data-cat="Interview Skills">Interview Skills</button>
+        <button class="filter-chip" data-cat="Networking">Networking</button>
+      </div>
+      <input type="text" id="archiveSearch" class="archive-search" placeholder="Search sessions...">
+    </div>
+    <div class="session-grid" id="sessionGrid">
+      <div class="skeleton-session"></div><div class="skeleton-session"></div><div class="skeleton-session"></div>
+    </div>
+    <div class="empty-state" id="sessionEmpty" hidden>NOTHING IN THE ARCHIVE YET.<span>Sessions will appear here after they're recorded.</span></div>
+    <div style="text-align:center;margin-top:50px;">
+      <button class="btn-ghost" id="loadMoreSessions" type="button" hidden>Load More</button>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="gallery" id="gallery">
+  <div class="container">
+    <div class="gallery-head reveal">
+      <div class="act-label" style="margin-bottom:24px;"><span class="act-num">ARCHIVE</span><div class="act-line"></div><span class="act-name">Gallery</span></div>
+      <h2>Moments on Stage</h2>
+    </div>
+    <div class="exhibit-mosaic reveal" id="galleryExhibit"></div>
+    <div class="empty-state" id="galleryEmpty" hidden>NOTHING ON DISPLAY YET.<span>Photos from events will show up here.</span></div>
+    <div class="gallery-cta-wrap reveal" id="galleryCtaWrap" hidden>
+      <button class="gallery-cta" id="viewAllMomentsBtn" type="button">
+        <span>VIEW ALL MOMENTS</span>
+        <span class="cta-arrow">&rarr;</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- FULL GALLERY OVERLAY MODAL -->
+<div class="modal-overlay full-gallery-modal" id="fullGalleryModal" role="dialog" aria-modal="true" aria-labelledby="fullGalleryTitle">
+  <div class="full-gallery-box">
+    <div class="full-gallery-header">
+      <div>
+        <div class="act-label" style="margin-bottom:4px;"><span class="act-num">AOC ARCHIVE</span><div class="act-line"></div></div>
+        <h3 class="full-gallery-title" id="fullGalleryTitle">All Moments</h3>
+      </div>
+      <button class="modal-close" id="fullGalleryClose" aria-label="Close full gallery">&times;</button>
+    </div>
+    <div class="full-gallery-grid" id="fullGalleryGrid"></div>
+  </div>
+</div>
+
+<!-- LIGHTBOX (gallery + video) -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close image viewer">&times;</button>
+  <button class="lightbox-nav lightbox-prev" id="lightboxPrev" aria-label="Previous image">&#8592;</button>
+  <div class="lightbox-content" id="lightboxContent"></div>
+  <button class="lightbox-nav lightbox-next" id="lightboxNext" aria-label="Next image">&#8594;</button>
+  <div class="lightbox-bar">
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="container">
+    <div class="testi-wrap" id="testiWrap">
+      <div class="testi-mark">"</div>
+    </div>
+    <div class="testi-dots" id="testiDots"></div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="team" id="team">
+  <div class="container">
+    <div class="team-head reveal">
+      <div class="act-label" style="margin-bottom:24px;"><span class="act-num">LEADERSHIP</span><div class="act-line"></div><span class="act-name">The Voices Behind AOC</span></div>
+      <h2>Leadership</h2>
+    </div>
+    <div class="team-grid" id="teamGrid"></div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta" id="join">
+  <div class="final-spot"></div>
+  <div class="container" style="position:relative;z-index:2;">
+    <h2 id="finalHeadline">The microphone <em>is waiting.</em></h2>
+    <button class="btn-primary" id="finalJoinBtn" type="button">Take the Stage</button>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+  <div class="container">
+    <div class="act-label reveal"><span class="act-num">GET IN TOUCH</span><div class="act-line"></div><span class="act-name">Contact</span></div>
+    <div class="events-head reveal"><h2>Say Something</h2></div>
+    <form class="contact-form reveal" id="contactForm">
+      <div class="hp-field" aria-hidden="true"><label for="cWebsite">Leave this field empty</label><input id="cWebsite" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+      <div class="form-row">
+        <div class="form-field"><label for="cName">Name</label><input id="cName" name="name" required maxlength="100"></div>
+        <div class="form-field"><label for="cEmail">Email</label><input id="cEmail" name="email" type="email" required maxlength="150"></div>
+      </div>
+      <div class="form-field"><label for="cSubject">Subject</label><input id="cSubject" name="subject" maxlength="150"></div>
+      <div class="form-field"><label for="cMessage">Message</label><textarea id="cMessage" name="message" rows="4" required maxlength="2000"></textarea></div>
+      <button type="submit" class="btn-primary">Send Message</button>
+      <div class="form-status" id="contactStatus" role="alert" aria-live="polite"></div>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-huge">AOC</div>
+    <div class="footer-tag">A stage for every voice.</div>
+    <div class="footer-row">
+      <div class="footer-meta">Art of Conversation<br>Madhav Institute of Technology & Science, Gwalior</div>
+      <ul class="footer-links" id="footerLinks"></ul>
+      <div class="soundwave" id="footerWave"></div>
+    </div>
+  </div>
+</footer>
+
+<!-- REGISTRATION MODAL -->
+<div class="modal-overlay" id="registerModal" role="dialog" aria-modal="true" aria-labelledby="registerEventTitle">
+  <div class="modal-box">
+    <button class="modal-close" id="registerClose" aria-label="Close registration form">&times;</button>
+    <div id="registerFormWrap">
+      <div class="eyebrow" style="margin-bottom:18px;">Register</div>
+      <h3 class="modal-title" id="registerEventTitle">Event Registration</h3>
+      <form id="registerForm">
+        <input type="hidden" name="event" id="regEventId">
+        <div class="hp-field" aria-hidden="true"><label for="regWebsite">Leave this field empty</label><input id="regWebsite" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+        <div class="form-field"><label>Full Name<input name="name" required maxlength="100"></label></div>
+        <div class="form-row">
+          <div class="form-field"><label>Email<input name="email" type="email" required maxlength="150"></label></div>
+          <div class="form-field"><label>Phone<input name="phone" type="tel" required maxlength="20"></label></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>College / Department<input name="department" maxlength="100"></label></div>
+          <div class="form-field"><label>Year
+            <select name="year"><option value="">Select</option><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select>
+          </label></div>
+        </div>
+        <div class="form-field"><label>Message (optional)<textarea name="message" rows="2" maxlength="1000"></textarea></label></div>
+        <button type="submit" class="btn-primary" id="registerSubmitBtn">Register</button>
+        <div class="form-status" id="registerStatus" role="alert" aria-live="polite"></div>
+      </form>
+    </div>
+    <div class="modal-success" id="registerSuccess" hidden>
+      <div class="success-check">✓</div>
+      <h3>YOU'RE IN.</h3>
+      <p>Your voice has a place in the room.<br>Registration confirmed.</p>
+      <button class="btn-ghost" id="registerSuccessClose" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- JOIN AOC MODAL -->
+<div class="modal-overlay" id="joinModal" role="dialog" aria-modal="true" aria-labelledby="joinModalTitle">
+  <div class="modal-box">
+    <button class="modal-close" id="joinClose" aria-label="Close join form">&times;</button>
+    <div id="joinFormWrap">
+      <div class="eyebrow" style="margin-bottom:18px;">Join AOC</div>
+      <h3 class="modal-title" id="joinModalTitle">Take the Stage</h3>
+      <p style="color:var(--text-dim);font-size:13px;margin:-6px 0 18px;font-family:'Inter',sans-serif;">No prior speaking experience is required — just bring your voice.</p>
+      <form id="joinForm">
+        <div class="hp-field" aria-hidden="true"><label for="joinWebsite">Leave this field empty</label><input id="joinWebsite" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+        <div class="form-field"><label>Name<input name="name" required maxlength="100"></label></div>
+        <div class="form-row">
+          <div class="form-field"><label>Email<input name="email" type="email" required maxlength="150"></label></div>
+          <div class="form-field"><label>Phone<input name="phone" type="tel" required maxlength="20"></label></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>Branch<input name="branch" maxlength="100"></label></div>
+          <div class="form-field"><label>Year
+            <select name="year"><option value="">Select</option><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select>
+          </label></div>
+        </div>
+        <div class="form-field"><label>Why do you want to join?<textarea name="reason" rows="2" required maxlength="1000"></textarea></label></div>
+        <div class="form-field"><label>Previous speaking experience (optional)<textarea name="experience" rows="2" maxlength="1000"></textarea></label></div>
+        <div class="form-field"><label>Intro Video Link (Drive / YouTube) (optional)<input name="introVideoUrl" type="url" placeholder="https://drive.google.com/... or https://youtube.com/..." maxlength="500"></label></div>
+        <div class="form-row">
+          <div class="form-field"><label>Instagram (optional)<input name="instagram" placeholder="https://instagram.com/..." maxlength="300"></label></div>
+          <div class="form-field"><label>LinkedIn (optional)<input name="linkedin" placeholder="https://linkedin.com/..." maxlength="300"></label></div>
+        </div>
+        <button type="submit" class="btn-primary" id="joinSubmitBtn">Submit</button>
+        <div class="form-status" id="joinStatus" role="alert" aria-live="polite"></div>
+      </form>
+    </div>
+    <div class="modal-success" id="joinSuccess" hidden>
+      <div class="success-check">✓</div>
+      <h3>YOU'RE IN.</h3>
+      <p>Your voice has a place in the room.<br>We'll reach out soon.</p>
+      <button class="btn-ghost" id="joinSuccessClose" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+/* ---------- Adaptive animation tiers (mobile-first) ---------- */
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const IS_DESKTOP = window.matchMedia('(hover:hover) and (pointer:fine) and (min-width:1025px)').matches;
+// "rich" tier gets cursor spotlight / 3D tilt / magnetic buttons / particles / parallax.
+// Mobile & tablet keep reveals, counters, timeline progress, gallery/button transitions — just lighter.
+const RICH = IS_DESKTOP && !REDUCED;
+
+/* ---------- Curtain / cinematic open sequence ---------- */
+/* Full curtain once per browser session; shorter on mobile; skipped for reduced-motion. */
+const SEEN_CURTAIN = sessionStorage.getItem('aoc_seen_curtain');
+const curtainEl = document.getElementById('curtain');
+
+if (REDUCED) {
+  curtainEl.style.display = 'none';
+  gsap.set('.navbar', {y:0});
+  gsap.set(['#heroEyebrow','.hero-title','.hero-title b','#heroCta','#heroScroll'], {opacity:1, y:0});
+  sessionStorage.setItem('aoc_seen_curtain', '1');
+} else if (SEEN_CURTAIN) {
+  // Returning within this session — skip straight to a quick fade, no re-narration.
+  gsap.set('#curtain', {opacity:0, pointerEvents:'none'});
+  gsap.set('.navbar', {y:0});
+  runHeroSequence();
+} else {
+  const mobileSpeed = IS_DESKTOP ? 1 : 0.55; // shorten curtain substantially on phones
+  const curtainTl = gsap.timeline({defaults:{ease:'power2.out'}});
+  curtainTl
+    .to('#curtainSpot', {opacity:1, scale:1.4, duration:1.6*mobileSpeed}, 0)
+    .to('#curtainText', {opacity:1, duration:1.4*mobileSpeed}, 0.4*mobileSpeed)
+    .to('#curtainText', {opacity:0, duration:1*mobileSpeed, delay:1.1*mobileSpeed})
+    .call(()=>{ document.getElementById('curtainText').textContent = 'Every voice has a beginning.'; })
+    .to('#curtainText', {opacity:1, duration:1.4*mobileSpeed})
+    .to('#curtainSpot', {scale:2.4, duration:1.6*mobileSpeed}, '<')
+    .to('#curtainText', {opacity:0, duration:1*mobileSpeed, delay:1.1*mobileSpeed})
+    .to('#curtain', {opacity:0, duration:1.4*mobileSpeed, pointerEvents:'none'}, '+=0.2')
+    .call(()=>{ runHeroSequence(); sessionStorage.setItem('aoc_seen_curtain','1'); }, [], '-=0.6')
+    .to('.navbar', {y:0, duration:1, ease:'power3.out'}, '-=0.8');
+}
+
+function runHeroSequence(){
+  const tl = gsap.timeline({defaults:{ease:'power3.out'}});
+  tl.to('#heroSpot', {width:900, height:900, duration:2.2, ease:'power2.out'}, 0)
+    .to('#heroEyebrow', {opacity:1, duration:.9}, 0.2)
+    .to('.hero-title', {opacity:1, duration:.3}, 0.4)
+    .to('.hero-title b', {y:'0%', duration:1.15, stagger:0.13}, 0.4)
+    .to('#heroCta', {opacity:1, duration:1}, 1.5)
+    .to('#heroScroll', {opacity:1, duration:1}, 1.8);
+}
+
+/* ---------- Navbar scroll state ---------- */
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', ()=>{ navbar.classList.toggle('scrolled', window.scrollY > 40); }, {passive:true});
+
+/* ---------- RICH-tier only: cursor spotlight + hero parallax + tilt + magnetic buttons + particles ---------- */
+if (RICH) {
+  const spot = document.getElementById('cursorSpot');
+  window.addEventListener('mousemove', (e)=>{ gsap.to(spot, {left:e.clientX, top:e.clientY, duration:0.6, ease:'power2.out'}); });
+
+  const heroSpotEl = document.getElementById('heroSpot');
+  document.querySelector('.hero').addEventListener('mousemove', (e)=>{
+    const x = (e.clientX / window.innerWidth - 0.5) * 50;
+    const y = (e.clientY / window.innerHeight - 0.5) * 50;
+    gsap.to(heroSpotEl, {x:x, y:y, duration:1.3, ease:'power2.out'});
+  });
+
+  // Dust particles — desktop only, paused when tab hidden
+  const canvas = document.getElementById('dust-canvas');
+  const ctx = canvas.getContext('2d');
+  function resizeCanvas(){canvas.width = window.innerWidth; canvas.height = window.innerHeight;}
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  const particles = Array.from({length:45}, ()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.1+0.25,s:Math.random()*0.22+0.04,o:Math.random()*0.35+0.06}));
+  let dustRAF;
+  function animateDust(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+      p.y -= p.s;
+      if(p.y < -10){p.y = canvas.height+10; p.x = Math.random()*canvas.width;}
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(246,232,190,${p.o})`; ctx.fill();
+    });
+    dustRAF = requestAnimationFrame(animateDust);
+  }
+  animateDust();
+  document.addEventListener('visibilitychange', ()=>{
+    if (document.hidden) { cancelAnimationFrame(dustRAF); }
+    else { animateDust(); }
+  });
+
+  // Tilt on posters / team
+  document.querySelectorAll('.poster, .team-card').forEach(card=>{
+    card.addEventListener('mousemove', e=>{
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left)/r.width - 0.5;
+      const y = (e.clientY - r.top)/r.height - 0.5;
+      gsap.to(card, {rotateY: x*5, rotateX: -y*5, duration:0.6, ease:'power2.out', transformPerspective:800});
+    });
+    card.addEventListener('mouseleave', ()=>{ gsap.to(card, {rotateY:0, rotateX:0, duration:0.8, ease:'power3.out'}); });
+  });
+
+  // Magnetic buttons
+  document.querySelectorAll('.btn-primary').forEach(btn=>{
+    btn.addEventListener('mousemove', e=>{
+      const r = btn.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width/2)*0.25;
+      const y = (e.clientY - r.top - r.height/2)*0.4;
+      gsap.to(btn, {x, y, duration:0.4, ease:'power2.out'});
+    });
+    btn.addEventListener('mouseleave', ()=>{ gsap.to(btn, {x:0, y:0, duration:0.5, ease:'elastic.out(1,0.4)'}); });
+  });
+} else {
+  // Non-rich tiers: hide the cursor spotlight and skip the canvas entirely (never allocated, never drawn).
+  const spot = document.getElementById('cursorSpot');
+  if (spot) spot.style.display = 'none';
+  const canvas = document.getElementById('dust-canvas');
+  if (canvas) canvas.style.display = 'none';
+}
+
+/* ---------- Soundwave (kept on all tiers — cheap, high value) ---------- */
+function buildWave(el, count){
+  const n = RICH ? count : Math.round(count * 0.6); // fewer bars on lighter tiers
+  for(let i=0;i<n;i++){
+    const bar = document.createElement('span');
+    const h = 6 + Math.random()*20;
+    bar.style.height = h+'px';
+    el.appendChild(bar);
+    if (!REDUCED) {
+      gsap.to(bar, {scaleY: 0.3 + Math.random()*1.5, duration: 0.6 + Math.random()*0.6, repeat:-1, yoyo:true, ease:'sine.inOut', delay: Math.random()*0.5});
+    }
+  }
+}
+buildWave(document.getElementById('heroWave'), 22);
+buildWave(document.getElementById('footerWave'), 16);
+
+/* ---------- Reveal on scroll (all tiers — this is the core "alive" feeling on mobile) ---------- */
+document.querySelectorAll('.reveal').forEach(el=>{
+  gsap.to(el, {opacity:1, y:0, duration: REDUCED ? 0.01 : 1.2, ease:'power3.out', scrollTrigger:{trigger:el, start:'top 85%'}});
+});
+
+/* ---------- Timeline fill (all tiers) ---------- */
+const tlFill = document.getElementById('tlFill');
+const tlItems = document.querySelectorAll('.tl-item');
+ScrollTrigger.create({
+  trigger:'.timeline', start:'top 60%', end:'bottom 60%',
+  onUpdate: self=>{ tlFill.style.height = (self.progress*100)+'%'; }
+});
+tlItems.forEach(item=>{
+  ScrollTrigger.create({trigger:item, start:'top 70%', onEnter:()=>item.classList.add('active')});
+});
+
+/* ---------- Testimonial rotation (all tiers) ---------- */
+const slides = document.querySelectorAll('.testi-slide');
+const dots = document.querySelectorAll('.testi-dot');
+let testiIdx = 0;
+function showTesti(i){
+  slides.forEach(s=>s.classList.remove('active'));
+  dots.forEach(d=>d.classList.remove('active'));
+  slides[i].classList.add('active'); dots[i].classList.add('active'); testiIdx = i;
+}
+dots.forEach(d=>d.addEventListener('click', ()=>showTesti(parseInt(d.dataset.i))));
+let testiInterval = setInterval(()=>{ showTesti((testiIdx+1)%slides.length); }, 5200);
+document.addEventListener('visibilitychange', ()=>{
+  clearInterval(testiInterval);
+  if (!document.hidden) testiInterval = setInterval(()=>{ showTesti((testiIdx+1)%slides.length); }, 5200);
+});
+
+/* ---------- Final CTA fade-to-dark sequence (all tiers) ---------- */
+gsap.set('#finalHeadline, #finalBtn', {opacity:0, y:20});
+gsap.timeline({scrollTrigger:{trigger:'.final-cta', start:'top 55%'}})
+  .to('#finalHeadline', {opacity:1, y:0, duration: REDUCED?0.01:1.4, ease:'power3.out'})
+  .to('#finalBtn', {opacity:1, y:0, duration: REDUCED?0.01:1.1, ease:'power3.out'}, '+=0.3');
+
+/* ---------- Scroll progress bar (mirrors app.js #scrollProgress if present, harmless if duplicated) ---------- */
+const scrollBar = document.getElementById('scrollProgress');
+if (scrollBar) {
+  window.addEventListener('scroll', ()=>{
+    const h = document.documentElement;
+    const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    scrollBar.style.width = `${scrolled}%`;
+  }, {passive:true});
+}
+
+/* ---------- Active nav highlighting (desktop nav only — mobile menu doesn't need it) ---------- */
+const navAnchors = document.querySelectorAll('.nav-links a[href^="#"]');
+if (navAnchors.length) {
+  navAnchors.forEach(a=>{
+    const id = a.getAttribute('href').slice(1);
+    const target = document.getElementById(id);
+    if (!target) return;
+    ScrollTrigger.create({
+      trigger: target, start:'top 45%', end:'bottom 45%',
+      onEnter: ()=> navAnchors.forEach(x=>x.classList.toggle('active', x===a)),
+      onEnterBack: ()=> navAnchors.forEach(x=>x.classList.toggle('active', x===a)),
+    });
+  });
+}
+
+/* ---------- Smooth anchor scroll (all tiers) ---------- */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click', e=>{
+    const target = document.querySelector(a.getAttribute('href'));
+    if(target){ e.preventDefault(); gsap.to(window, {duration: REDUCED?0.01:1.2, scrollTo:{y:target, offsetY:0}, ease:'power3.inOut'}); }
+  });
+});
+</script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

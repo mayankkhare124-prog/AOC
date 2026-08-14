@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AOC Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <div class="login-logo">AOC</div>
+    <div class="login-sub">Admin Console</div>
+    <form id="loginForm">
+      <div class="form-field"><label>Email</label><input type="email" name="email" required autocomplete="username"></div>
+      <div class="form-field"><label>Password</label><input type="password" name="password" required autocomplete="current-password"></div>
+      <button type="submit" class="btn-primary" id="loginBtn">Login</button>
+      <div class="form-status" id="loginStatus"></div>
+    </form>
+  </div>
+</div>
+
+<!-- DASHBOARD SHELL -->
+<div id="dashboard" class="dashboard" hidden>
+  <aside class="sidebar">
+    <div class="sidebar-logo">AOC <span>Admin</span></div>
+    <nav class="sidebar-nav">
+      <button data-view="overview" class="nav-item active">Overview</button>
+      <div class="nav-group">Events</div>
+      <button data-view="events" class="nav-item">All Events</button>
+      <div class="nav-group">Content</div>
+      <button data-view="sessions" class="nav-item">Sessions / Videos</button>
+      <button data-view="gallery" class="nav-item">Gallery</button>
+      <button data-view="testimonials" class="nav-item">Testimonials</button>
+      <button data-view="team" class="nav-item">Leadership</button>
+      <div class="nav-group">Inbox</div>
+      <button data-view="registrations" class="nav-item">Registrations</button>
+      <button data-view="join" class="nav-item">Join Requests</button>
+      <button data-view="contact" class="nav-item">Contact Messages</button>
+      <div class="nav-group">Site</div>
+      <button data-view="settings" class="nav-item">Settings</button>
+    </nav>
+    <button id="logoutBtn" class="logout-btn">Logout</button>
+  </aside>
+
+  <main class="main-panel">
+    <header class="topbar">
+      <div class="topbar-title" id="viewTitle">Overview</div>
+      <a href="/" target="_blank" class="view-site-link">View Site &rarr;</a>
+    </header>
+    <div class="view-content" id="viewContent"></div>
+  </main>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<!-- Generic modal used for all Add/Edit forms -->
+<div class="modal-overlay" id="crudModal">
+  <div class="modal-box">
+    <button class="modal-close" id="crudModalClose">&times;</button>
+    <h3 class="modal-title" id="crudModalTitle">Add Item</h3>
+    <form id="crudForm"></form>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/admin/admin.js"></script>
+</body>
+</html>
