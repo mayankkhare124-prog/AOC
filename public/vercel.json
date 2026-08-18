@@ -1,15 +1,19 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://aoc-backend-87yq.onrender.com/api/$1"
+      "source": "/api/:path*",
+      "destination": "https://aoc-backend-87yq.onrender.com/api/:path*"
     },
     {
-      "source": "/events/(.*)",
+      "source": "/events/:path*",
       "destination": "/event.html"
     },
     {
       "source": "/admin",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/admin/:path*",
       "destination": "/admin/index.html"
     }
   ]
