@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://YOUR-RENDER-URL.onrender.com/api/$1"
+    },
+    {
+      "source": "/events/(.*)",
+      "destination": "/event.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/index.html"
+    }
+  ]
+}
