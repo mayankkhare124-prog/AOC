@@ -20,11 +20,13 @@ function escapeHTML(value) {
 }
 
 /* Only allow http(s) image/video URLs through into src/href attributes —
-   blocks javascript:, data:text/html, and similar attribute-breakout vectors. */
+   blocks javascript:, data:text/html, and similar attribute-breakout vectors.
+   Automatically converts Google Drive share URLs into direct image URLs via getImageUrl. */
 function safeURL(url) {
   if (!url) return '';
+  const processed = typeof getImageUrl === 'function' ? getImageUrl(url) : url;
   try {
-    const u = new URL(url, window.location.origin);
+    const u = new URL(processed, window.location.origin);
     if (u.protocol === 'http:' || u.protocol === 'https:') return u.href;
   } catch (err) { /* invalid URL — fall through to empty */ }
   return '';
@@ -177,17 +179,51 @@ async function loadEvents() {
 let ALL_SESSIONS = [];
 let sessionsShown = 6;
 
+function extractYouTubeId(url) {
+  if (!url || typeof url !== 'string') return null;
+  const trimmed = url.trim();
+  // Regex to match YouTube watch, shorts, embed, and youtu.be short links
+  const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const match = trimmed.match(regExp);
+  if (match && match[1] && match[1].length === 11) {
+    return match[1];
+  }
+  return null;
+}
+
 function resolveVideoEmbed(url) {
   if (!url) return null;
-  const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]{6,})/);
-  if (yt) return { type: 'iframe', src: `https://www.youtube.com/embed/${yt[1]}?autoplay=1` };
+
+  // 1. Check YouTube
+  const ytId = extractYouTubeId(url);
+  if (ytId) {
+    const origin = window.location.origin;
+    const embedUrl = `https://www.youtube.com/embed/${ytId}?autoplay=1&enablejsapi=1&origin=${encodeURIComponent(origin)}&rel=0`;
+    const watchUrl = `https://www.youtube.com/watch?v=${ytId}`;
+    return { type: 'youtube', id: ytId, src: embedUrl, watchUrl };
+  }
+
+  // 2. Check Google Drive Video
+  const driveFileId = typeof extractGoogleDriveFileId === 'function' ? extractGoogleDriveFileId(url) : null;
+  if (driveFileId) {
+    const previewUrl = `https://drive.google.com/file/d/${driveFileId}/preview`;
+    const originalUrl = url.trim();
+    return { type: 'gdrive', fileId: driveFileId, src: previewUrl, originalUrl };
+  }
+
+  // 3. Check Vimeo
   const vimeo = url.match(/vimeo\.com\/(\d+)/);
-  if (vimeo) return { type: 'iframe', src: `https://player.vimeo.com/video/${vimeo[1]}?autoplay=1` };
+  if (vimeo) {
+    return { type: 'iframe', src: `https://player.vimeo.com/video/${vimeo[1]}?autoplay=1` };
+  }
+
+  // 4. Check Direct Video Files (.mp4 / .webm)
   if (/\.(mp4|webm)$/i.test(url)) {
     const safe = safeURL(url);
     return safe ? { type: 'video', src: safe } : null;
   }
-  // Unrecognized URL shape — only allow it through as an iframe src if it's a genuine http(s) URL.
+
+  // Fallback for generic external iframe link if valid URL
   const safe = safeURL(url);
   return safe ? { type: 'iframe', src: safe } : null;
 }
@@ -195,6 +231,7 @@ function resolveVideoEmbed(url) {
 function renderSessions() {
   const grid = document.getElementById('sessionGrid');
   const empty = document.getElementById('sessionEmpty');
+  const dotsContainer = document.getElementById('sessionDots');
   const loadMoreBtn = document.getElementById('loadMoreSessions');
   if (!grid) return;
 
@@ -211,6 +248,7 @@ function renderSessions() {
   if (!filtered.length) {
     grid.innerHTML = '';
     empty.hidden = false;
+    if (dotsContainer) dotsContainer.innerHTML = '';
     loadMoreBtn.hidden = true;
     return;
   }
@@ -242,6 +280,35 @@ function renderSessions() {
       openVideoLightbox(session);
     });
   });
+
+  // Render carousel dots on mobile
+  if (dotsContainer) {
+    dotsContainer.innerHTML = visible
+      .map((_, i) => `<button class="carousel-dot ${i === 0 ? 'active' : ''}" data-index="${i}" aria-label="Go to video ${i + 1}"></button>`)
+      .join('');
+
+    dotsContainer.querySelectorAll('.carousel-dot').forEach((dot) => {
+      dot.addEventListener('click', () => {
+        const idx = parseInt(dot.dataset.index, 10);
+        const card = grid.children[idx];
+        if (card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+        }
+      });
+    });
+
+    // Update active dot on swipe
+    grid.onscroll = () => {
+      const cards = grid.children;
+      if (!cards.length) return;
+      const scrollLeft = grid.scrollLeft;
+      const cardWidth = cards[0].offsetWidth + 14; // card width + gap
+      const activeIdx = Math.min(Math.round(scrollLeft / cardWidth), visible.length - 1);
+      dotsContainer.querySelectorAll('.carousel-dot').forEach((d, i) => {
+        d.classList.toggle('active', i === activeIdx);
+      });
+    };
+  }
 
   loadMoreBtn.hidden = filtered.length <= sessionsShown;
 }
@@ -414,14 +481,99 @@ function openVideoLightbox(session) {
   lb.dataset.mode = 'video';
   const embed = resolveVideoEmbed(session.videoUrl);
   const content = document.getElementById('lightboxContent');
+  document.body.classList.add('modal-open');
+
+  const watchFallbackBtn = session.videoUrl ? `
+    <div style="margin-top:14px;text-align:center;">
+      <a href="${escapeHTML(session.videoUrl)}" target="_blank" rel="noopener noreferrer" class="watch-yt-btn">
+        Watch on YouTube &rarr;
+      </a>
+    </div>` : '';
+
   if (!embed) {
-    content.innerHTML = `<div style="max-width:500px;text-align:center;font-family:'Fraunces',serif;font-style:italic;font-size:20px;color:#A3A3A8;">
-      This session recording isn't linked yet.<br>Check back soon.</div>`;
+    content.innerHTML = `
+      <div class="video-error-fallback">
+        <div class="fallback-title">Video unavailable here</div>
+        <p class="fallback-desc">This video cannot be played inside the website.</p>
+        ${watchFallbackBtn}
+      </div>`;
+  } else if (embed.type === 'gdrive') {
+    const thumbUrl = safeURL(session.thumbnail) || 'https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=800&auto=format&fit=crop';
+    const driveUrl = escapeHTML(embed.originalUrl);
+    content.innerHTML = `
+      <div class="drive-video-player" id="gdrivePlayerWrap">
+        <div class="gdrive-thumb-preview" id="gdriveThumbPreview" style="pointer-events:auto;z-index:5;">
+          <img src="${thumbUrl}" alt="${escapeHTML(session.title)}" loading="lazy" style="pointer-events:none;">
+          <a href="${driveUrl}" target="_blank" rel="noopener noreferrer" class="gdrive-play-trigger" aria-label="Play video on Google Drive" style="pointer-events:auto;z-index:10;text-decoration:none;">
+            <span style="pointer-events:none;">&#9658;</span>
+          </a>
+          ${session.duration ? `<div class="session-duration" style="pointer-events:none;">${escapeHTML(session.duration)}</div>` : ''}
+        </div>
+      </div>
+      <div style="margin-top:14px;text-align:center;">
+        <a href="${driveUrl}" target="_blank" rel="noopener noreferrer" class="watch-yt-btn">
+          WATCH ON GOOGLE DRIVE &rarr;
+        </a>
+      </div>`;
+
+    const openDriveTab = (e) => {
+      e.stopPropagation();
+    };
+
+    const playBtn = content.querySelector('.gdrive-play-trigger');
+    const thumbPreview = content.querySelector('#gdriveThumbPreview');
+
+    if (playBtn) playBtn.addEventListener('click', openDriveTab);
+    if (thumbPreview) {
+      thumbPreview.addEventListener('click', (e) => {
+        if (e.target !== playBtn && !playBtn.contains(e.target)) {
+          window.open(embed.originalUrl, '_blank', 'noopener,noreferrer');
+        }
+      });
+    }
+  } else if (embed.type === 'youtube') {
+    content.innerHTML = `
+      <div class="responsive-video-wrap">
+        <iframe src="${embed.src}" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen 
+                title="${escapeHTML(session.title)}" 
+                loading="lazy" 
+                referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      </div>
+      <div class="yt-fallback-notice" style="display:none;" id="ytErrorNotice">
+        <div class="fallback-title">Video unavailable here</div>
+        <p class="fallback-desc">YouTube restricts playing this video on external sites.</p>
+        <div style="margin-top:12px;">
+          <a href="${escapeHTML(embed.watchUrl)}" target="_blank" rel="noopener noreferrer" class="watch-yt-btn">
+            Watch on YouTube &rarr;
+          </a>
+        </div>
+      </div>`;
+
+    // Listen for window error or iframe loading timeout to present clean fallback if YouTube blocks playback
+    const iframe = content.querySelector('iframe');
+    let loaded = false;
+    if (iframe) {
+      iframe.onload = () => { loaded = true; };
+      // Note: YouTube error 153 postMessages can be caught via window postMessage listener
+    }
   } else if (embed.type === 'iframe') {
-    content.innerHTML = `<iframe src="${embed.src}" allow="autoplay; fullscreen" allowfullscreen title="${escapeHTML(session.title)}"></iframe>`;
+    content.innerHTML = `
+      <div class="responsive-video-wrap">
+        <iframe src="${embed.src}" 
+                allow="autoplay; fullscreen" 
+                allowfullscreen 
+                title="${escapeHTML(session.title)}" 
+                loading="lazy"></iframe>
+      </div>`;
   } else {
-    content.innerHTML = `<video src="${embed.src}" controls autoplay></video>`;
+    content.innerHTML = `
+      <div class="responsive-video-wrap">
+        <video src="${embed.src}" controls autoplay></video>
+      </div>`;
   }
+
   document.getElementById('lightboxCaption').textContent = `${session.title}${session.speaker ? ' — ' + session.speaker : ''}`;
   const counterEl = document.getElementById('lightboxCounter');
   if (counterEl) counterEl.textContent = '';
@@ -431,11 +583,30 @@ function openVideoLightbox(session) {
   openModalA11y('lightbox');
 }
 
+// Global window listener for postMessage YouTube errors (e.g. error 153 / 101 / 150)
+window.addEventListener('message', (e) => {
+  if (!e.data || typeof e.data !== 'string') return;
+  try {
+    const parsed = JSON.parse(e.data);
+    if (parsed && parsed.event === 'infoDelivery' && parsed.info && parsed.info.errorCode) {
+      const errNotice = document.getElementById('ytErrorNotice');
+      const wrap = document.querySelector('.responsive-video-wrap');
+      if (errNotice) {
+        if (wrap) wrap.style.display = 'none';
+        errNotice.style.display = 'block';
+      }
+    }
+  } catch (err) {
+    // Ignore non-JSON postMessages
+  }
+});
+
 function initLightbox() {
   const lb = document.getElementById('lightbox');
   const close = () => {
     lb.classList.remove('open');
     document.getElementById('lightboxContent').innerHTML = '';
+    document.body.classList.remove('modal-open');
     closeModalA11y('lightbox');
   };
   document.getElementById('lightboxClose').addEventListener('click', close);

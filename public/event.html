@@ -185,8 +185,9 @@ function escapeHTML(value) {
 }
 function safeURL(url) {
   if (!url) return '';
+  const processed = typeof getImageUrl === 'function' ? getImageUrl(url) : url;
   try {
-    const u = new URL(url, window.location.origin);
+    const u = new URL(processed, window.location.origin);
     if (u.protocol === 'http:' || u.protocol === 'https:') return u.href;
   } catch (err) { /* fall through */ }
   return '';

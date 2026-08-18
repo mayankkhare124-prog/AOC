@@ -21,6 +21,7 @@ const joinRoutes = require('./routes/join');
 const contactRoutes = require('./routes/contact');
 const settingsRoutes = require('./routes/settings');
 const overviewRoutes = require('./routes/overview');
+const mongoose = require('mongoose');
 
 const app = express();
 
@@ -117,11 +118,42 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
+let server;
+
+const shutdown = (signal) => {
+  const finish = () => process.exit(0);
+
+  if (server) {
+    server.close(() => {
+      mongoose.connection.close(false).then(finish).catch(finish);
+    });
+    return;
+  }
+
+  mongoose.connection.close(false).then(finish).catch(finish);
+};
+
 connectDB().then(() => {
-  app.listen(PORT, () => {
+  server = app.listen(PORT, () => {
     console.log(`\n  AOC server running → http://localhost:${PORT}`);
     console.log(`  Admin panel        → http://localhost:${PORT}/admin\n`);
   });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${PORT} is already in use. Stop the existing process and try again.`);
+      process.exit(1);
+    }
+    throw err;
+  });
+});
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
+// Nodemon sends SIGUSR2 for restarts; exit after cleanup so the next child can bind safely.
+process.once('SIGUSR2', () => {
+  shutdown('SIGUSR2');
 });
 
 module.exports = app;

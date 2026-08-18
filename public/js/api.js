@@ -1,13 +1,29 @@
 /* ============================================================
-   AOC — API helper
-   All frontend fetch calls go through here so error handling,
-   base URL, and auth headers stay in one place.
-
-   Auth model: httpOnly cookie ONLY. The server never returns a JWT in the
-   response body, and the frontend never stores or reads a token — every
-   request simply sends credentials:'include' and the browser attaches the
-   cookie automatically. This keeps the token out of reach of any XSS/JS.
+   AOC Image Storage Utility
+   Supports:
+   1. Google Drive URLs (https://drive.google.com/file/d/FILE_ID/view?usp=sharing, etc.)
+   2. Normal external URLs (https://images.unsplash.com/...)
+   3. Local relative assets (/images/...)
    ============================================================ */
+function extractGoogleDriveFileId(url) {
+  if (!url || typeof url !== 'string') return null;
+  const trimmed = url.trim();
+  // Regex to extract 25-50 char Google Drive file ID from view, uc, open, or d/ paths
+  const driveRegex = /(?:drive\.google\.com\/(?:file\/d\/|uc\?(?:[^&]+&)*id=|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]{25,50})/;
+  const match = trimmed.match(driveRegex);
+  return match ? match[1] : null;
+}
+
+function getImageUrl(source) {
+  if (!source || typeof source !== 'string') return '';
+  const fileId = extractGoogleDriveFileId(source);
+  if (fileId) {
+    // Generate high-reliability Google Drive direct thumbnail/image viewing URL
+    return `https://lh3.googleusercontent.com/d/${fileId}=s1600`;
+  }
+  return source.trim();
+}
+
 const API_BASE = '/api';
 
 async function apiRequest(path, { method = 'GET', body } = {}) {

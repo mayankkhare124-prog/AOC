@@ -373,7 +373,10 @@ function renderTableRows(view, data) {
         const cells = cfg.columns
           .map((c) => {
             const raw = item[c.key];
-            if (c.type === 'thumb') return `<td>${raw ? `<img class="cell-thumb" src="${esc(raw)}" onerror="this.style.opacity=0.2">` : '—'}</td>`;
+            if (c.type === 'thumb') {
+              const src = getImageUrl(raw);
+              return `<td>${src ? `<img class="cell-thumb" src="${esc(src)}" onerror="this.style.opacity=0.2;this.title='Image could not be loaded. Check Google Drive sharing permissions.';">` : '—'}</td>`;
+            }
             if (c.type === 'statusBadge') return `<td><span class="badge ${esc(raw)}">${esc(raw)}</span></td>`;
             if (c.type === 'boolBadge') return `<td><span class="badge ${raw ? 'upcoming' : 'past'}">${raw ? 'Yes' : 'No'}</span></td>`;
             if (c.type === 'capacity') {
@@ -438,6 +441,8 @@ function openCrudForm(view, item) {
     cfg.fields
       .map((f) => {
         const val = isEdit ? item[f.name] : f.default;
+        const isImageField = ['imageUrl', 'posterImage', 'thumbnail'].includes(f.name);
+
         if (f.type === 'textarea') {
           return `<div class="form-field"><label>${f.label}</label><textarea name="${f.name}" rows="3">${esc(val || '')}</textarea></div>`;
         }
@@ -453,9 +458,50 @@ function openCrudForm(view, item) {
           const dateVal = val ? new Date(val).toISOString().slice(0, 10) : '';
           return `<div class="form-field"><label>${f.label}</label><input type="date" name="${f.name}" value="${dateVal}" ${f.required ? 'required' : ''}></div>`;
         }
-        return `<div class="form-field"><label>${f.label}</label><input type="${f.type}" name="${f.name}" value="${esc(val ?? '')}" ${f.required ? 'required' : ''}></div>`;
+        
+        let fieldHtml = `<div class="form-field"><label>${f.label}</label><input type="${f.type}" name="${f.name}" id="field_${f.name}" value="${esc(val ?? '')}" ${f.required ? 'required' : ''}>`;
+        
+        if (isImageField) {
+          fieldHtml += `
+            <div style="font-size:11px;color:var(--text-dim);margin-top:4px;line-height:1.4;">
+              ⓘ Paste direct URL or <strong>Google Drive link</strong>.<br>
+              <em>Drive Access: Set to "Anyone with the link" → "Viewer".</em>
+            </div>
+            <div id="previewWrap_${f.name}" style="margin-top:8px;display:${val ? 'block' : 'none'};">
+              <div style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--text-dim);margin-bottom:4px;">Image Preview:</div>
+              <img id="preview_${f.name}" src="${val ? esc(getImageUrl(val)) : ''}" style="max-height:140px;border-radius:6px;border:1px solid var(--border);object-fit:cover;" onerror="this.style.display='none';document.getElementById('previewErr_${f.name}').style.display='block';">
+              <div id="previewErr_${f.name}" style="display:none;font-size:11px;color:#e08a7a;margin-top:4px;">⚠️ Image could not be loaded. Check Google Drive sharing permissions.</div>
+            </div>`;
+        }
+        fieldHtml += `</div>`;
+        return fieldHtml;
       })
-      .join('') + `<button type="submit" class="btn-primary">${isEdit ? 'Save Changes' : 'Create'}</button><div class="form-status" id="crudStatus"></div>`;
+      .join('') + `<button type="submit" class="btn-primary" style="margin-top:16px;">${isEdit ? 'Save Changes' : 'Create'}</button><div class="form-status" id="crudStatus"></div>`;
+
+  // Wire up dynamic live previews for image fields in form
+  cfg.fields.forEach((f) => {
+    if (['imageUrl', 'posterImage', 'thumbnail'].includes(f.name)) {
+      const input = document.getElementById(`field_${f.name}`);
+      const wrap = document.getElementById(`previewWrap_${f.name}`);
+      const img = document.getElementById(`preview_${f.name}`);
+      const err = document.getElementById(`previewErr_${f.name}`);
+
+      if (input && wrap && img) {
+        input.addEventListener('input', () => {
+          const raw = input.value.trim();
+          if (!raw) {
+            wrap.style.display = 'none';
+            return;
+          }
+          const resolved = getImageUrl(raw);
+          img.src = resolved;
+          img.style.display = 'block';
+          if (err) err.style.display = 'none';
+          wrap.style.display = 'block';
+        });
+      }
+    }
+  });
 
   form.onsubmit = async (e) => {
     e.preventDefault();

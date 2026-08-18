@@ -4,8 +4,8 @@
   "description": "AOC — Art of Conversation, MITS Gwalior. Full-stack club website.",
   "main": "backend/server.js",
   "scripts": {
-    "dev": "nodemon backend/server.js",
-    "start": "node backend/server.js",
+    "dev": "node backend/scripts/freePort.js && nodemon backend/server.js",
+    "start": "node backend/scripts/freePort.js && node backend/server.js",
     "seed": "node backend/scripts/seed.js"
   },
   "dependencies": {
