@@ -1,5 +1,5 @@
 :root{
-  --bg:#050506; --surface:#0D0D0F; --surface2:#141416; --ivory:#FAF8F4; --champagne:#E7D9B0;
+  --bg:#050506; --surface:#0D0D0F; --surface2:#141416; --ivory:#FAF8F4; --champagne:#D6B66A;
   --text-dim:#9A9A9F; --border:rgba(255,255,255,0.08); --danger:#d96b5a;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
