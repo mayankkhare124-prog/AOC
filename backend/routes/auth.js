@@ -1,5 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const Admin = require('../models/Admin');
 const asyncHandler = require('../utils/asyncHandler');
 const { protect } = require('../middleware/auth');
@@ -10,6 +11,25 @@ function signToken(id) {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   });
+}
+
+function getCookieOptions() {
+  const isProd = process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  };
+}
+
+function getClearCookieOptions() {
+  const isProd = process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+  };
 }
 
 // POST /api/auth/login
@@ -23,18 +43,31 @@ router.post(
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email and password are required.' });
     }
-    const admin = await Admin.findOne({ email: email.toLowerCase() }).select('+password');
-    if (!admin || !(await admin.comparePassword(password))) {
+    const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
+    const adminPassword = process.env.ADMIN_PASSWORD || '';
+
+    if (!adminEmail || !adminPassword) {
+      return res.status(500).json({ success: false, message: 'Admin authentication is not configured.' });
+    }
+
+    if (email.toLowerCase() !== adminEmail || password !== adminPassword) {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
+
+    // MongoDB remains the source for admin profile/id used by JWT + protected routes.
+    let admin = await Admin.findOne({ email: adminEmail });
+    if (!admin) {
+      admin = await Admin.create({
+        name: 'AOC Admin',
+        email: adminEmail,
+        // Placeholder only to satisfy schema; login validation is env-based.
+        password: crypto.randomBytes(32).toString('hex'),
+      });
+    }
+
     const token = signToken(admin._id);
 
-    res.cookie('aoc_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    res.cookie('aoc_token', token, getCookieOptions());
 
     res.json({
       success: true,
@@ -45,7 +78,7 @@ router.post(
 
 // POST /api/auth/logout — clears the auth cookie
 router.post('/logout', (req, res) => {
-  res.clearCookie('aoc_token');
+  res.clearCookie('aoc_token', getClearCookieOptions());
   res.json({ success: true });
 });
 
