@@ -117,6 +117,7 @@ app.use('/api', notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
+const DEPLOYED_URL = process.env.DEPLOYED_URL;
 
 let server;
 
@@ -137,6 +138,9 @@ connectDB().then(() => {
   server = app.listen(PORT, () => {
     console.log(`\n  AOC server running → http://localhost:${PORT}`);
     console.log(`  Admin panel        → http://localhost:${PORT}/admin\n`);
+    if (DEPLOYED_URL) {
+      console.log(`  Deployed site      → ${DEPLOYED_URL}\n`);
+    }
   });
 
   server.on('error', (err) => {

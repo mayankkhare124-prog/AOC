@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://aoc-backend-87yq.onrender.com/api/:path*"
+    },
+    {
+      "source": "/events/:path*",
+      "destination": "/event.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "/admin/index.html"
+    }
+  ]
+}
